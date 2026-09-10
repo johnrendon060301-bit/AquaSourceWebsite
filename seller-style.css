@@ -242,9 +242,11 @@ a {
 }
 
 .field {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
 }
 
 .field label {
@@ -254,6 +256,10 @@ a {
   color: var(--text-soft);
   margin-bottom: 7px;
   line-height: 1.35;
+  min-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .input-wrap,
@@ -262,11 +268,13 @@ a {
   display: flex;
   align-items: center;
   width: 100%;
+  height: 46px;
 }
 
 .input {
   width: 100%;
-  padding: 13px 15px;
+  height: 46px;
+  padding: 0 15px;
   border-radius: 12px;
   border: 1.6px solid var(--line);
   background: var(--surface);
@@ -274,6 +282,7 @@ a {
   color: var(--text);
   outline: none;
   font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -287,15 +296,27 @@ a {
   background: var(--critical-bg);
 }
 
+.input-wrap:has(.input-icon-btn) .input,
+.input-wrap input[type="password"] {
+  padding-right: 58px;
+}
+
 .input-icon-btn {
   position: absolute;
-  right: 13px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   cursor: pointer;
   color: var(--text-faint);
   font-size: 11.5px;
   font-weight: 700;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 /* Hide browser native password reveal eye icon (Edge / WebKit) */
@@ -1081,7 +1102,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .form-grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
+  align-items: start;
 }
 
 @media (max-width: 640px) {
@@ -1617,7 +1639,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   border-radius: 24px;
   padding: 28px;
   width: 100%;
-  max-width: 480px;
+  max-width: 540px;
   box-shadow: var(--shadow-lg);
   max-height: 88vh;
   overflow-y: auto;
