@@ -51,22 +51,27 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Restore remembered session / email if previously selected
+  // 3. Restore remembered session / email & password if previously selected
   const rememberBox = document.getElementById('rememberBox');
   const loginEmail = document.getElementById('loginEmail');
   const isRemembered = localStorage.getItem('aquasource_remember_session') === 'true';
   const savedEmail = localStorage.getItem('aquasource_remember_email');
+  const savedPassEnc = localStorage.getItem('aquasource_remember_pass');
 
-  if (isRemembered && savedEmail) {
-    if (loginEmail) {
+  if (isRemembered) {
+    if (savedEmail && loginEmail) {
       loginEmail.value = savedEmail;
+    }
+    if (savedPassEnc && loginPass) {
+      try {
+        loginPass.value = decodeURIComponent(atob(savedPassEnc));
+      } catch (e) {
+        loginPass.value = savedPassEnc;
+      }
     }
     if (rememberBox) {
       rememberBox.classList.add('checked');
       rememberBox.textContent = '✓';
-    }
-    if (loginPass) {
-      loginPass.focus();
     }
   }
 });
@@ -136,9 +141,15 @@ async function handleLoginSubmit() {
     if (isRemembered) {
       localStorage.setItem('aquasource_remember_session', 'true');
       localStorage.setItem('aquasource_remember_email', email);
+      try {
+        localStorage.setItem('aquasource_remember_pass', btoa(encodeURIComponent(pass)));
+      } catch (e) {
+        localStorage.setItem('aquasource_remember_pass', pass);
+      }
     } else {
       localStorage.removeItem('aquasource_remember_session');
       localStorage.removeItem('aquasource_remember_email');
+      localStorage.removeItem('aquasource_remember_pass');
     }
 
     // 1. Authenticate user credentials
@@ -737,6 +748,11 @@ function toggleCheck(el) {
   if (box) {
     const isChecked = box.classList.toggle('checked');
     box.textContent = isChecked ? '✓' : '';
+    if (!isChecked && (box.id === 'rememberBox' || el.id === 'rememberBox')) {
+      localStorage.removeItem('aquasource_remember_session');
+      localStorage.removeItem('aquasource_remember_email');
+      localStorage.removeItem('aquasource_remember_pass');
+    }
   }
 }
 
