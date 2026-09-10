@@ -137,7 +137,9 @@ function normalizeShipmentData(raw, code) {
   const trackingCode = raw.trackingCode || raw.code || code;
   const isCancelled = raw.status === 'cancelled' || raw.statusLabel === 'Cancelled';
   const stage = typeof raw.stage === 'number' ? raw.stage : (raw.status === 'delivered' ? 3 : (raw.status === 'transit' ? 1 : 0));
-  const statusLabel = isCancelled ? 'Cancelled' : (raw.status?.label || raw.statusLabel || (raw.status === 'delivered' ? 'Delivered' : 'In Transit'));
+  const isDelivered = raw.status === 'delivered' || raw.statusLabel === 'Delivered' || stage === 3 || raw.isExpired === true;
+  const isExpired = isDelivered;
+  const statusLabel = isCancelled ? 'Cancelled' : (isDelivered ? 'Delivered (Expired)' : (raw.status?.label || raw.statusLabel || 'In Transit'));
   const progressPercent = isCancelled ? 100 : (typeof raw.status?.progressPercent === 'number' ? raw.status.progressPercent : (stage === 3 ? 100 : (stage === 2 ? 82 : 45)));
 
   // Extract water quality
@@ -263,7 +265,16 @@ function handleCodeNotFound(code) {
 function onShipmentDataReceived(data) {
   currentShipmentData = data;
   const errEl = document.getElementById('codeError');
-  if (errEl) errEl.classList.remove('show');
+  const errText = document.getElementById('codeErrorMsg');
+
+  if (data.isExpired || data.status?.stage === 3 || String(data.status?.label).toLowerCase().includes('delivered')) {
+    if (errText) errText.innerHTML = `⏳ <b>Tracking Code Expired:</b> Shipment #${data.trackingCode} has been delivered and completed. Real-time telemetry tracking is closed.`;
+    if (errEl) {
+      errEl.className = 'code-error show expired-notice';
+    }
+  } else {
+    if (errEl) errEl.classList.remove('show');
+  }
 
   // 1. Tracking Code & Sub-header
   const batchEl = document.getElementById('dashBatchId');
@@ -498,6 +509,8 @@ function renderDeliveryCompleteView(data) {
   if (dashEl) dashEl.classList.remove('show');
   if (compEl) compEl.classList.add('show');
 
+  const title = document.getElementById('completeTitle');
+  const expBadge = document.getElementById('completeExpiredBadge');
   const sub = document.getElementById('completeBatchSub');
   const time = document.getElementById('completeTime');
   const dur = document.getElementById('compDuration');
@@ -505,7 +518,9 @@ function renderDeliveryCompleteView(data) {
   const spd = document.getElementById('compAvgSpeed');
   const surv = document.getElementById('compSurvival');
 
-  if (sub) sub.textContent = `${data.batchId || 'Batch'} has arrived safely at ${data.parties?.buyer || 'your farm'}.`;
+  if (title) title.textContent = 'Delivery Completed (Tracking Expired)';
+  if (expBadge) expBadge.textContent = `⏳ Tracking #${data.trackingCode} Expired`;
+  if (sub) sub.textContent = `Tracking #${data.trackingCode} has expired following arrival at ${data.parties?.buyer || 'your farm'}. Live telemetry is closed.`;
   if (time) time.textContent = data.deliverySummary?.deliveredAt || '09:02 AM';
   if (dur) dur.textContent = data.deliverySummary?.totalDuration || '1h 52m';
   if (dist) dist.textContent = data.deliverySummary?.distanceTraveled || '41.6 km';

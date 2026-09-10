@@ -434,6 +434,12 @@ img {
   display: flex;
 }
 
+.code-error.expired-notice {
+  background: #FFF3CD;
+  color: #856404;
+  border: 1px solid #FFEEBA;
+}
+
 .quick-codes {
   margin-top: 14px;
   display: flex;

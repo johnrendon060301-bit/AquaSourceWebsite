@@ -226,7 +226,10 @@
   <!-- ============ MODAL: NEW ORDER ============ -->
   <div class="modal-overlay" id="newOrderModal">
     <div class="modal-box wide">
-      <div class="modal-title">New Transport Order</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="modal-title" style="margin-bottom:0;">New Transport Order</div>
+        <button class="icon-btn" onclick="closeNewOrderModal()">✕</button>
+      </div>
       <div class="modal-sub">Assign a shipment to transport personnel for fingerling delivery.</div>
 
       <div class="form-grid2">
@@ -496,7 +499,10 @@
   <!-- ============ MODAL: EDIT PROFILE ============ -->
   <div class="modal-overlay" id="editProfileModal">
     <div class="modal-box">
-      <div class="modal-title">Edit Farm Profile</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="modal-title" style="margin-bottom:0;">Edit Farm Profile</div>
+        <button class="icon-btn" onclick="closeEditProfileModal()">✕</button>
+      </div>
       <div class="modal-sub">Update your business and contact information.</div>
 
       <div class="field">
