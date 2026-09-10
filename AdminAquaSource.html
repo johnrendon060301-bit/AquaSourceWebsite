@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaSource Admin — Seller Verification & Farm Management</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="admin-style.css">
+
+  <!-- Firebase SDKs (Compat v10.8.0) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <!-- Email Dispatch SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+</head>
+<body>
+
+  <!-- ============ APP SHELL ============ -->
+  <div id="appShell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="logo-transparent.png" alt="AquaSource Logo" style="height:44px; width:auto; vertical-align:middle; margin-right:10px; filter:drop-shadow(0 3px 6px rgba(11,93,122,0.18));">
+        Aqua<span>Source</span>
+      </div>
+
+      <nav class="side-nav">
+        <div class="side-item active" onclick="showView('dashboard', this)">
+          <span class="side-ico">📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="side-item" onclick="showView('pending', this)">
+          <span class="side-ico">⏳</span>
+          <span>Pending Review</span>
+          <span class="side-count" id="pendingCount">0</span>
+        </div>
+        <div class="side-item" onclick="showView('approved', this)">
+          <span class="side-ico">✅</span>
+          <span>Approved</span>
+        </div>
+        <div class="side-item" onclick="showView('rejected', this)">
+          <span class="side-ico">⛔</span>
+          <span>Rejected</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="sidebar-profile">
+          <div class="sidebar-avatar" id="adminAvatar">AD</div>
+          <div>
+            <div class="sidebar-name" id="adminEmailDisplay">Admin Console</div>
+            <div class="sidebar-role">BFAR Compliance</div>
+          </div>
+        </div>
+        <div class="logout-link" onclick="doLogout()">
+          <span>🚪</span>
+          <span>Log Out</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="icon-btn" id="hamburgerBtn" onclick="toggleSidebar()" style="display:none;">☰</button>
+          <div class="topbar-title" id="topbarTitle">Dashboard Overview</div>
+        </div>
+      </header>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <div class="welcome-card">
+          <div class="welcome-hi">Bureau of Fisheries & Aquatic Resources (BFAR)</div>
+          <div class="welcome-name">Farm Owners Compliance Dashboard</div>
+          <div class="welcome-sub">Verify and monitor seller farm permits and aquaculture transport compliance across all regions.</div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-tile warn">
+            <div class="stat-tile-count" id="statPending">0</div>
+            <div class="stat-tile-label">Pending Reviews</div>
+          </div>
+          <div class="stat-tile done">
+            <div class="stat-tile-count" id="statApproved">0</div>
+            <div class="stat-tile-label">Approved Farm Owners</div>
+          </div>
+          <div class="stat-tile rejected">
+            <div class="stat-tile-count" id="statRejected">0</div>
+            <div class="stat-tile-label">Rejected Applications</div>
+          </div>
+          <div class="stat-tile total">
+            <div class="stat-tile-count" id="statTotal">0</div>
+            <div class="stat-tile-label">Total Applications</div>
+          </div>
+        </div>
+
+        <div class="section-label">Awaiting Verification</div>
+        <div class="account-grid" id="dashPendingGrid"></div>
+      </div>
+
+      <!-- VIEW 2: PENDING REVIEW -->
+      <div class="view" id="view-pending">
+        <div class="section-label">Pending Farm Owner Submissions</div>
+        <div class="account-grid" id="pendingGrid"></div>
+      </div>
+
+      <!-- VIEW 3: APPROVED ACCOUNTS -->
+      <div class="view" id="view-approved">
+        <div class="section-label">Verified & Approved Farm Owners</div>
+        <div class="account-grid" id="approvedGrid"></div>
+      </div>
+
+      <!-- VIEW 4: REJECTED ACCOUNTS -->
+      <div class="view" id="view-rejected">
+        <div class="section-label">Disapproved Seller Applications</div>
+        <div class="account-grid" id="rejectedGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ============ REVIEW ACCOUNT MODAL ============ -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-box wide">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="modal-title" id="reviewName">Farm Name</div>
+          <div class="modal-sub" id="reviewMeta">Submitted Date</div>
+        </div>
+        <button class="icon-btn" onclick="closeReviewModal()">✕</button>
+      </div>
+
+      <div class="review-grid">
+        <div>
+          <div class="permit-frame" id="permitFrame"></div>
+          <div class="permit-hint">Official BFAR License Document Scan</div>
+        </div>
+        <div>
+          <div class="section-label" style="margin-top:0;">Farm Information</div>
+          <div class="detail-row2"><span>Farm Business</span><span id="rHatchery">—</span></div>
+          <div class="detail-row2"><span>Applicant Name</span><span id="rApplicant">—</span></div>
+          <div class="detail-row2"><span>Email Address</span><span id="rEmail">—</span></div>
+          <div class="detail-row2"><span>Phone Number</span><span id="rPhone">—</span></div>
+          <div class="detail-row2"><span>Farm Address</span><span id="rAddress">—</span></div>
+          <div class="detail-row2"><span>Submitted</span><span id="rSubmitted">—</span></div>
+          <div class="detail-row2"><span>Verification Status</span><span id="rStatus">—</span></div>
+
+          <div id="rReasonBlock" style="display:none;">
+            <div class="account-reason" style="margin-top:14px;">
+              <b>Rejection reason</b>
+              <span id="rReasonText"></span>
+            </div>
+          </div>
+
+          <div class="review-actions" id="reviewActionButtons">
+            <button class="btn btn-outline" onclick="openRejectModal()">⛔ Reject</button>
+            <button class="btn btn-success" onclick="approveCurrentAccount()">✅ Approve Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ REJECT REASON MODAL ============ -->
+  <div class="modal-overlay" id="rejectModal">
+    <div class="modal-box">
+      <div class="modal-title">Reject Seller Application</div>
+      <div class="modal-sub">Select or describe what needs to be corrected with their BFAR permit.</div>
+      <ul class="reason-list">
+        <li onclick="useReason(this)">Permit photo is blurry or unreadable.</li>
+        <li onclick="useReason(this)">Permit appears expired or invalid.</li>
+        <li onclick="useReason(this)">Uploaded document is not a certified BFAR permit.</li>
+        <li onclick="useReason(this)">Business name on permit does not match registered hatchery.</li>
+      </ul>
+      <div class="field">
+        <label>Detailed Explanation for Applicant</label>
+        <div class="input-wrap">
+          <textarea class="input" id="rejectReasonInput" placeholder="Specify requirements for re-submission…"></textarea>
+        </div>
+      </div>
+      <div class="review-actions">
+        <button class="btn btn-outline" onclick="closeRejectModal()">Cancel</button>
+        <button class="btn btn-critical" onclick="confirmReject()">Confirm Rejection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RESET PASSWORD (LINK) MODAL ============ -->
+  <div class="modal-overlay" id="forgotPassModal">
+    <div class="modal-box" style="max-width:440px;">
+      <button class="modal-close-btn" onclick="closeForgotPassModal()">✕</button>
+      
+      <div style="font-size:36px; margin-bottom:8px;">🔑</div>
+      <h3 style="font-size:20px; font-weight:700; color:var(--text); margin-bottom:6px;">Reset Administrator Password</h3>
+      <p style="font-size:13px; color:var(--text-soft); margin-bottom:18px;">
+        Enter your registered administrator email address. We will send a secure password reset link directly to your inbox.
+      </p>
+
+      <!-- Modal Alert Box -->
+      <div class="login-err" id="fpError" style="margin-bottom:14px;"></div>
+      <div id="fpSuccessMsg" style="display:none; padding:14px 16px; background:#e0f2fe; border:1px solid #bae6fd; border-radius:10px; color:#0369a1; font-size:13px; margin-bottom:16px; text-align:left; line-height:1.5;">
+        <b>✉️ Reset link sent!</b><br>
+        Check your Gmail inbox and click the reset link to create your new password. Once updated, you can log in with your new password.
+      </div>
+
+      <div id="fpFormContent">
+        <div class="field" style="margin-bottom:16px;">
+          <label>Admin Email Address</label>
+          <div class="input-wrap">
+            <input class="input" id="fpEmail" type="email" placeholder="admin@aquasource.ph" autocomplete="email">
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="fpSendLinkBtn" onclick="handleSendResetLink()">
+          Send Reset Link ✉️
+        </button>
+      </div>
+
+      <div style="margin-top:16px; text-align:center;">
+        <button class="link-sm" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer;" onclick="closeForgotPassModal()">
+          ← Back to Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- External Scripts -->
+  <script src="admin-firebase.js"></script>
+  <script src="admin-script.js"></script>
+</body>
+</html>

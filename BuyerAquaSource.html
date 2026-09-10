@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaSource — Live Fingerling Delivery Tracking</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS for Live Interactive GPS Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDKs (Compat v10.8.0) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <!-- Leaflet JS for Map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</head>
+<body>
+
+  <!-- ============ NAVBAR ============ -->
+  <div class="navbar">
+    <div class="navbar-inner">
+      <a href="#" class="brand">
+        <img src="logo-transparent.png" alt="AquaSource Logo" class="brand-img" style="height:48px; width:auto; vertical-align:middle; margin-right:10px; filter:drop-shadow(0 3px 6px rgba(11,93,122,0.16));">
+        Aqua<span>Source</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="#how">How It Works</a>
+        <a href="#track">Track Shipment</a>
+        <a href="index.html" style="color:var(--accent); font-weight:700;">Portal Login ➔</a>
+      </div>
+
+      <div class="nav-cta">
+        <div class="nav-badge" id="navBadge">
+          <div class="nav-dot"></div>
+          <span id="navBadgeText">In Transit</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ HERO SECTION ============ -->
+  <section class="hero" id="track">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow">⚡ Real-time Telemetry & GPS Tracking</div>
+        <h1>Track your fingerling <span>shipment live.</span></h1>
+        <p class="lead">Monitor live water temperature, dissolved oxygen, pH level, and GPS arrival time directly from the transport monitoring unit.</p>
+        
+        <div class="hero-stats">
+          <div class="hero-stat"><b>99.4%</b><span>Average Survival Rate</span></div>
+          <div class="hero-stat"><b>&lt; 5s</b><span>IoT Telemetry Sync</span></div>
+          <div class="hero-stat"><b>24/7</b><span>Autonomous Monitoring</span></div>
+        </div>
+      </div>
+
+      <div class="track-card">
+        <div class="track-card-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="#0B5D7A" stroke-width="2"/>
+            <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="#0B5D7A" stroke-width="2"/>
+            <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="#0B5D7A" stroke-width="2"/>
+            <path d="M14 14h3v3h-3zM19 14h2M14 19h2M19 17v4" stroke="#00B4D8" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Enter Tracking Code</h3>
+        <p>Enter the unique shipment tracking code provided by your hatchery seller after dispatch.</p>
+        
+        <div class="code-field">
+          <input class="code-input" id="codeInput" placeholder="AQS-XXXXX" maxlength="16" autofocus>
+        </div>
+        
+        <div class="code-error" id="codeError">
+          <span>⚠️</span>
+          <span id="codeErrorMsg">Invalid tracking code. Please check with your seller and try again.</span>
+        </div>
+        
+        <button class="btn btn-primary btn-block" id="trackBtn" onclick="trackShipment()">Track Live Shipment</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section" id="how">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">Seamless Buyer Experience</div>
+        <h2>How AquaSource Tracking Works</h2>
+        <p>No buyer login required — instant real-time telemetry backed by IoT sensors and cloud data.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h4>Order Dispatched</h4>
+          <p>Your hatchery seller packages your fingerlings into oxygenated transport tanks fitted with AquaSource telemetry units.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h4>Receive Tracking Code</h4>
+          <p>A secure tracking code (e.g. AQS-7X29K) is automatically generated and shared with you upon vehicle departure.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h4>Live Telemetry & Water Quality</h4>
+          <p>Track truck GPS location, real-time dissolved oxygen, pH, temperature, and receive automated warnings if conditions fluctuate.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LIVE DASHBOARD ============ -->
+  <section id="dashboard">
+    <div class="container">
+      <div class="dash-top">
+        <div>
+          <div class="dash-title">
+            <span id="dashBatchId">Batch #AQS-7X29K</span>
+            <span class="live-indicator">● Live IoT Telemetry</span>
+          </div>
+          <div class="dash-sub" id="dashRouteSub">Bluewater Tilapia Hatchery → Green Water Farms</div>
+        </div>
+        <div class="status-pill" id="statusPill">
+          <div class="status-dot"></div>
+          <span id="statusPillText">In Transit</span>
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <!-- LEFT: progress + interactive map + water quality -->
+        <div>
+          <div class="card">
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-steps">
+              <span class="done" id="stepDeparted">Departed</span>
+              <span id="stepHalfway">Halfway</span>
+              <span id="stepNear">Near Farm</span>
+              <span id="stepArrived">Delivered</span>
+            </div>
+          </div>
+
+          <div class="map-card">
+            <div class="map-toolbar">
+              <div class="map-toolbar-title">📍 Live Vehicle Telemetry (Google Maps GPS)</div>
+            </div>
+            <div class="map-container-wrap">
+              <div id="leafletMap" style="height:340px; width:100%; border-radius:14px;"></div>
+            </div>
+            <div class="map-info">
+              <div>Speed<b id="dashSpeed">48 km/h</b></div>
+              <div>Current Location<b id="dashLocation">South Coastal Rd, Talisay</b></div>
+              <div>Coordinates<b id="dashCoords">10.3157, 123.8854</b></div>
+            </div>
+          </div>
+
+          <div class="eta-row">
+            <div class="eta-tile">
+              <div class="eta-label">Estimated Arrival (ETA)</div>
+              <div class="eta-value" id="etaValue">27<span>min</span></div>
+            </div>
+            <div class="eta-tile">
+              <div class="eta-label">Remaining Distance</div>
+              <div class="eta-value" id="distValue">18.2<span>km</span></div>
+            </div>
+          </div>
+
+          <div class="section-label">Live Water Quality (Read-Only Telemetry)</div>
+          <div class="wq-readonly-note">🔒 Live telemetry stream from AquaSource IoT Transport Tank Sensor Probe</div>
+          <div class="wq-grid">
+            <div class="wq-card" id="wqCardTurb">
+              <div class="wq-top"><span class="wq-label">Turbidity</span><div class="wq-dot dot-green" id="wqDotTurb"></div></div>
+              <div class="wq-value" id="wqTurb">6<span class="wq-unit">NTU</span></div>
+              <div class="wq-status status-green" id="wqStatusTurb">Safe (&lt; 20 NTU)</div>
+            </div>
+            <div class="wq-card" id="wqCardDO">
+              <div class="wq-top"><span class="wq-label">Dissolved O₂</span><div class="wq-dot dot-green" id="wqDotDO"></div></div>
+              <div class="wq-value" id="wqDO">6.7<span class="wq-unit">mg/L</span></div>
+              <div class="wq-status status-green" id="wqStatusDO">Safe (&gt; 5.0 mg/L)</div>
+            </div>
+            <div class="wq-card" id="wqCardPH">
+              <div class="wq-top"><span class="wq-label">pH Level</span><div class="wq-dot dot-green" id="wqDotPH"></div></div>
+              <div class="wq-value" id="wqPH">7.2<span class="wq-unit">pH</span></div>
+              <div class="wq-status status-green" id="wqStatusPH">Safe (6.8 – 8.2)</div>
+            </div>
+            <div class="wq-card" id="wqCardTemp">
+              <div class="wq-top"><span class="wq-label">Temperature</span><div class="wq-dot dot-green" id="wqDotTemp"></div></div>
+              <div class="wq-value" id="wqTemp">29.2<span class="wq-unit">°C</span></div>
+              <div class="wq-status status-green" id="wqStatusTemp">Safe (26°C – 30°C)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: driver contact + shipment parties + notifications -->
+        <div>
+          <!-- DRIVER & VEHICLE CONTACT CARD -->
+          <div class="card" style="margin-bottom:18px; border-left:4px solid var(--accent); background:linear-gradient(180deg, #F4FAFD 0%, #FFFFFF 100%);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+              <div>
+                <div style="font-size:11.5px; font-weight:700; color:var(--text-soft); text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px;">Assigned Transport Personnel</div>
+                <h3 style="font-size:17.5px; font-weight:800; margin:0; color:var(--primary);" id="detailDriverName">Ramon Cruz</h3>
+              </div>
+              <span class="status-pill success" id="driverPillBadge" style="padding:4px 10px; font-size:11px;">Active Driver</span>
+            </div>
+
+            <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px;">
+              <div class="detail-row2" style="padding:5px 0;">
+                <span style="font-weight:600; color:var(--text-soft);">📞 Contact Phone:</span>
+                <b id="detailDriverPhone" style="font-size:14px; color:var(--primary);">0917 555 0101</b>
+              </div>
+              <div class="detail-row2" style="padding:5px 0;">
+                <span style="font-weight:600; color:var(--text-soft);">🛡️ Transport Status:</span>
+                <b id="driverStatusText" style="color:var(--success); font-size:13px;">Assigned &amp; Active</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="detail-group-title">Parties & Destination</div>
+            <div class="detail-row2"><span>Hatchery Seller</span><span id="detailSeller">Bluewater Tilapia Hatchery</span></div>
+            <div class="detail-row2"><span>Buyer Farm</span><span id="detailBuyer">Green Water Farms</span></div>
+            
+            <div class="detail-group-title">Shipment Information</div>
+            <div class="detail-row2"><span>Tracking Code</span><span class="mono" id="detailTrackingCode">AQS-7X29K</span></div>
+            <div class="detail-row2"><span>Fingerling Species</span><span id="detailSpecies">Tilapia Fingerlings</span></div>
+            <div class="detail-row2"><span>Quantity</span><span id="detailQuantity">3,000 pcs</span></div>
+            <div class="detail-row2"><span>Dispatched</span><span id="detailDispatched">Jul 31, 07:10 AM</span></div>
+            <div class="detail-row2"><span>Expected Arrival</span><span id="detailExpectedArrival">Jul 31, 09:05 AM</span></div>
+            <div class="detail-row2"><span>Monitoring Unit</span><span class="mono" id="detailUnit">Pending Driver Scan</span></div>
+            <div class="detail-row2"><span>Last Telemetry Sync</span><span class="mono" id="detailLastSync">Just now</span></div>
+          </div>
+
+          <div class="section-label" style="margin-top:20px;">Live Dispatch Notifications</div>
+          <div id="notifList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DELIVERY COMPLETE ============ -->
+  <section id="complete">
+    <div class="container complete-wrap">
+      <div class="complete-check">✓</div>
+      <div class="complete-title">Delivery Completed Successfully</div>
+      <div class="complete-sub" id="completeBatchSub">Batch #AQS-7X29K has arrived safely at Green Water Farms.</div>
+      <div class="complete-time" id="completeTime">09:02 AM</div>
+      <div class="complete-time-label">Official Delivery Timestamp</div>
+
+      <div class="trip-summary-grid">
+        <div class="trip-stat"><div class="trip-stat-label">Total Duration</div><div class="trip-stat-value" id="compDuration">1h 52m</div></div>
+        <div class="trip-stat"><div class="trip-stat-label">Distance Traveled</div><div class="trip-stat-value" id="compDistance">41.6 km</div></div>
+        <div class="trip-stat"><div class="trip-stat-label">Avg. Speed</div><div class="trip-stat-value" id="compAvgSpeed">46 km/h</div></div>
+        <div class="trip-stat"><div class="trip-stat-label">Survival Rate</div><div class="trip-stat-value" id="compSurvival">99.7%</div></div>
+      </div>
+
+      <div class="card wq-report">
+        <div class="detail-group-title" style="margin-top:0;">Final Water Quality Compliance Log</div>
+        <div class="detail-row2"><span>Turbidity</span><span style="color:var(--success);" id="compTurb">6 NTU — Safe</span></div>
+        <div class="detail-row2"><span>Dissolved O₂</span><span style="color:var(--success);" id="compDO">6.5 mg/L — Safe</span></div>
+        <div class="detail-row2"><span>pH Level</span><span style="color:var(--success);" id="compPH">7.3 — Safe</span></div>
+        <div class="detail-row2"><span>Temperature</span><span style="color:var(--success);" id="compTemp">29.0°C — Safe</span></div>
+      </div>
+
+      <div class="complete-btns">
+        <button class="btn btn-primary" onclick="downloadDeliveryReport()">⬇ Download Delivery Certificate</button>
+        <button class="btn btn-outline" onclick="resetTracking()">Track Another Shipment</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CRITICAL ALERT MODAL ============ -->
+  <div class="modal-overlay" id="criticalModal">
+    <div class="alert-modal">
+      <div class="alert-ico">⚠️</div>
+      <div class="alert-title">Water Quality Critical Alert</div>
+      <div class="alert-text" id="alertModalText">Dissolved oxygen dropped to <b>3.1 mg/L</b> inside the transport tank for Batch #AQS-7X29K.</div>
+      <div class="alert-text">The transport driver has been alerted and the automated tank aeration backup system has been triggered.</div>
+      <button class="btn btn-primary btn-block" style="margin-top:18px;" onclick="closeCriticalModal()">Acknowledge Alert</button>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="container footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="logo-transparent.png" alt="AquaSource Logo" style="height:42px; width:auto; vertical-align:middle; margin-right:10px; filter:drop-shadow(0 3px 6px rgba(11,93,122,0.16));">
+          Aqua<span>Source</span>
+        </div>
+        <p>Autonomous real-time water quality monitoring and live delivery telemetry for aquaculture hatcheries and fish farmers.</p>
+      </div>
+      <div>
+        <h5>Tracking</h5>
+        <ul>
+          <li><a href="#track">Live GPS Tracking</a></li>
+          <li><a href="#track">Water Telemetry</a></li>
+          <li><a href="#how">How It Works</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Parameters</h5>
+        <ul>
+          <li><a href="#">Dissolved Oxygen</a></li>
+          <li><a href="#">Turbidity Probe</a></li>
+          <li><a href="#">pH & Temp Sensors</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Support</h5>
+        <ul>
+          <li><a href="#">Hatchery Hotline</a></li>
+          <li><a href="#">Terms & Compliance</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <div>© 2026 AquaSource Telemetry Systems. All rights reserved.</div>
+      <div>Autonomous IoT Telemetry Cloud</div>
+    </div>
+  </footer>
+
+  <!-- External JavaScript Files -->
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

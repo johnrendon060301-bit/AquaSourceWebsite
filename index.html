@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaSource — Unified Portal Login</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="auth-style.css">
+
+  <!-- Firebase App, Auth & Firestore SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <div class="auth-wrapper" id="loginCard">
+    <div class="auth-card">
+      <div class="brand-header">
+        <img src="logo-transparent.png" alt="AquaSource Logo">
+        Aqua<span>Source</span>
+      </div>
+
+      <div class="auth-title">Welcome to AquaSource</div>
+      <div class="auth-sub">Sign in with your email to access your Farm Owner or Administrator console.</div>
+
+      <!-- Status Alerts -->
+      <div class="alert-box alert-error" id="loginError"></div>
+      <div class="alert-box alert-success" id="loginSuccess"></div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <div class="input-wrap">
+          <input class="input" id="loginEmail" type="email" placeholder="name@aquasource.ph" autocomplete="email" autofocus>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input class="input" id="loginPass" type="password" placeholder="Enter your password" autocomplete="current-password">
+          <button class="input-icon-btn" type="button" onclick="togglePass('loginPass', this)">SHOW</button>
+        </div>
+      </div>
+
+      <div class="row-between">
+        <div class="check-row" onclick="toggleCheck(this)">
+          <div class="checkbox" id="rememberBox"></div>
+          <span>Remember session</span>
+        </div>
+        <span class="link-sm" onclick="handleForgotPassword()">Forgot password?</span>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="loginSubmitBtn" onclick="handleLoginSubmit()">
+        Sign In
+      </button>
+
+      <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--text-soft);">
+        Don't have a seller account? <span class="link-sm" onclick="showSignup()">Register as Farm Owner</span>
+      </div>
+
+      <!-- ============ BUYER TRACKING CALLOUT ============ -->
+      <div class="buyer-box">
+        <div class="buyer-box-head">
+          <span>📦</span>
+          <span>Tracking a Fingerling Delivery?</span>
+        </div>
+        <p>No login needed for buyers. View live water telemetry, dissolved oxygen, and GPS vehicle tracking.</p>
+        <a href="BuyerAquaSource.html" class="btn btn-outline btn-block">
+          Go to Buyer Delivery Tracking →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FARM OWNER SIGNUP SCREEN ============ -->
+  <div class="auth-wrapper wide" id="signupCard" style="display:none;">
+    <div class="auth-card">
+      <div class="brand-header">
+        <img src="logo-transparent.png" alt="AquaSource Logo">
+        Aqua<span>Source</span>
+      </div>
+
+      <div class="auth-title">Register Your Farm</div>
+      <div class="auth-sub">Create your farm owner seller account and upload your BFAR Fishpond/Farm Permit for verification.</div>
+
+      <!-- Status Alerts -->
+      <div class="alert-box alert-error" id="signupError"></div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>First Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupFirstName" placeholder="e.g. Juan" autocomplete="given-name">
+          </div>
+        </div>
+        <div class="field">
+          <label>Last Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupLastName" placeholder="e.g. Dela Cruz" autocomplete="family-name">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Farm / Business Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupFarm" placeholder="e.g. Bluewater Aquaculture Farm">
+          </div>
+        </div>
+        <div class="field">
+          <label>Contact Gmail Address (@gmail.com) *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupEmail" type="email" placeholder="yourfarm@gmail.com" autocomplete="email">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Password (min. 8 chars, 1 capital, 1 special char) *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupPass" type="password" placeholder="e.g. AquaFarm#2026">
+            <button class="input-icon-btn" type="button" onclick="togglePass('signupPass', this)">SHOW</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Confirm Password *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupConfirmPass" type="password" placeholder="Re-type password">
+            <button class="input-icon-btn" type="button" onclick="togglePass('signupConfirmPass', this)">SHOW</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Contact Phone Number (Numbers only) *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupPhone" type="tel" placeholder="0917 555 0101" oninput="this.value = this.value.replace(/[^0-9+\s\-()]/g, '')">
+          </div>
+        </div>
+        <div class="field">
+          <label>Farm Physical Address *</label>
+          <div class="input-wrap">
+            <input class="input" id="signupAddress" placeholder="e.g. Brgy. Looc, Cebu City">
+          </div>
+        </div>
+      </div>
+
+      <!-- BFAR Permit Upload -->
+      <div class="field" style="margin-top:6px;">
+        <label>BFAR Fishpond / Farm Permit Document *</label>
+        <div class="upload-box" id="permitUploadBox" onclick="document.getElementById('permitFileInput').click()">
+          <input type="file" id="permitFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handlePermitUpload(event)">
+          <div id="permitPlaceholder">
+            <div class="upload-ico">📄</div>
+            <div class="upload-text">Click to upload photo of BFAR Farm Permit</div>
+            <div class="upload-hint">Supported formats: JPG, PNG, WEBP (Max 5MB)</div>
+          </div>
+          <img id="permitPreview" alt="Permit Preview" style="display:none;">
+          <div class="upload-change" id="permitChangeBtn" style="display:none;">Change File</div>
+        </div>
+        <div class="upload-filename" id="permitFileName"></div>
+      </div>
+
+      <button class="btn btn-primary btn-block" id="signupSubmitBtn" style="margin-top:14px;" onclick="handleSignupSubmit()">
+        Create Account &amp; Submit BFAR Permit
+      </button>
+
+      <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--text-soft);">
+        Already registered? <span class="link-sm" onclick="showLogin()">Sign In to Portal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FORGOT PASSWORD MODAL ============ -->
+  <div class="modal-overlay" id="forgotPassModal">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeForgotPassModal()">✕</button>
+      
+      <div style="font-size:36px; margin-bottom:8px;">🔑</div>
+      <h3 style="font-size:20px; font-weight:700; color:var(--text); margin-bottom:6px;">Reset Password</h3>
+      <p style="font-size:13px; color:var(--text-soft); margin-bottom:18px;">
+        Enter your registered email address. We will send a secure password reset link directly to your inbox.
+      </p>
+
+      <div class="alert-box alert-error" id="fpError" style="margin-bottom:14px;"></div>
+      <div class="alert-box alert-success" id="fpSuccessMsg" style="margin-bottom:16px;">
+        <b>✉️ Reset link sent!</b><br>
+        Please check your Gmail inbox and click the reset link to create your new password.
+      </div>
+
+      <div id="fpFormContent">
+        <div class="field" style="margin-bottom:16px;">
+          <label>Registered Email Address</label>
+          <div class="input-wrap">
+            <input class="input" id="fpEmail" type="email" placeholder="name@aquasource.ph" autocomplete="email">
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="fpSendLinkBtn" onclick="handleSendResetLink()">
+          Send Reset Link ✉️
+        </button>
+      </div>
+
+      <div style="margin-top:16px; text-align:center;">
+        <button class="link-sm" style="background:none; border:none; color:var(--accent); font-weight:600; cursor:pointer;" onclick="closeForgotPassModal()">
+          ← Back to Sign In
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ EDIT / UPDATE SUBMITTED APPLICATION MODAL ============ -->
+  <div class="modal-overlay" id="editAppModal">
+    <div class="modal-box wide">
+      <button class="modal-close-btn" onclick="closeEditApplicationModal()">✕</button>
+      
+      <div style="font-size:32px; margin-bottom:6px;">✏️</div>
+      <h3 style="font-size:20px; font-weight:700; color:var(--text); margin-bottom:4px;">Edit Submitted Registration</h3>
+      <p style="font-size:13px; color:var(--text-soft); margin-bottom:18px;">
+        Update your farm details or upload a corrected BFAR Farm Permit photo before review.
+      </p>
+
+      <div class="alert-box alert-error" id="editAppError" style="margin-bottom:14px;"></div>
+      <div class="alert-box alert-success" id="editAppSuccess" style="margin-bottom:14px;"></div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>First Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="editAppFirstName" placeholder="First Name">
+          </div>
+        </div>
+        <div class="field">
+          <label>Last Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="editAppLastName" placeholder="Last Name">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Farm / Business Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="editAppFarm" placeholder="Farm / Business Name">
+          </div>
+        </div>
+        <div class="field">
+          <label>Registered Gmail (@gmail.com) *</label>
+          <div class="input-wrap">
+            <input class="input" id="editAppEmail" type="email" placeholder="yourfarm@gmail.com">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Contact Phone Number (Numbers only) *</label>
+          <div class="input-wrap">
+            <input class="input" id="editAppPhone" type="tel" placeholder="0917 555 0101" oninput="this.value = this.value.replace(/[^0-9+\s\-()]/g, '')">
+          </div>
+        </div>
+        <div class="field">
+          <label>Farm Physical Address *</label>
+          <div class="input-wrap">
+            <input class="input" id="editAppAddress" placeholder="Physical Farm Address">
+          </div>
+        </div>
+      </div>
+
+      <!-- BFAR Permit Upload / Change -->
+      <div class="field" style="margin-top:6px;">
+        <label>BFAR Fishpond / Farm Permit Document *</label>
+        <div class="upload-box has-image" id="editPermitUploadBox" onclick="document.getElementById('editPermitFileInput').click()">
+          <input type="file" id="editPermitFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleEditPermitUpload(event)">
+          <div id="editPermitPlaceholder" style="display:none;">
+            <div class="upload-ico">📄</div>
+            <div class="upload-text">Click to upload photo of BFAR Farm Permit</div>
+            <div class="upload-hint">Supported formats: JPG, PNG, WEBP (Max 5MB)</div>
+          </div>
+          <img id="editPermitPreview" alt="Permit Preview" style="display:block;">
+          <div class="upload-change" id="editPermitChangeBtn" style="display:block;">Change Photo</div>
+        </div>
+        <div class="upload-filename" id="editPermitFileName"></div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeEditApplicationModal()">Cancel</button>
+        <button class="btn btn-primary" id="editAppSubmitBtn" style="flex:1;" onclick="handleSaveApplicationEdit()">
+          Save &amp; Update Application
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Auth Script -->
+  <script src="auth-script.js"></script>
+</body>
+</html>

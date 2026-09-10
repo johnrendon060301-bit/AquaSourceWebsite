@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaSource — Farm Owner Seller Portal</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="seller-style.css">
+
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Firebase App & Service SDKs (v10.8.0 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- ============ APP SHELL ============ -->
+  <div id="appShell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <img src="logo-transparent.png" alt="AquaSource Logo">
+        Aqua<span>Source</span>
+      </div>
+
+      <nav class="side-nav">
+        <div class="side-item active" data-view="dashboard" onclick="showView('dashboard', this)">
+          <span class="side-ico">📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="side-item" data-view="orders" onclick="showView('orders', this)">
+          <span class="side-ico">📦</span>
+          <span>Transport Orders</span>
+        </div>
+        <div class="side-item" data-view="personnel" onclick="showView('personnel', this)">
+          <span class="side-ico">👥</span>
+          <span>Personnel</span>
+        </div>
+        <div class="side-item" data-view="history" onclick="showView('history', this)">
+          <span class="side-ico">📈</span>
+          <span>Telemetry History</span>
+        </div>
+        <div class="side-item" data-view="notifications" onclick="showView('notifications', this)">
+          <span class="side-ico">🔔</span>
+          <span>Notifications</span>
+          <span class="side-dot" id="notifDot" style="display:none;"></span>
+        </div>
+        <div class="side-item" data-view="profile" onclick="showView('profile', this)">
+          <span class="side-ico">🏢</span>
+          <span>Farm Profile</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="sidebar-profile">
+          <div class="sidebar-avatar" id="sidebarAvatar">FO</div>
+          <div>
+            <div class="sidebar-name" id="sidebarHatcheryName">Farm Owner</div>
+            <div class="sidebar-role" id="sidebarEmail">seller@aquasource.ph</div>
+          </div>
+        </div>
+        <div class="logout-link" onclick="openLogoutConfirm()">
+          <span>🚪</span>
+          <span>Log Out</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="icon-btn" id="hamburgerBtn" onclick="toggleSidebar()" style="display:none;">☰</button>
+          <div class="topbar-title" id="topbarTitle">Dashboard Overview</div>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" onclick="showView('notifications', document.querySelector('[data-view=notifications]'))" title="Notifications">
+            🔔
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <div class="welcome-card">
+          <div>
+            <div class="welcome-hi">Farm Owner Console</div>
+            <div class="welcome-name" id="welcomeHatcheryName">Farm Owner</div>
+            <div class="welcome-sub">Dispatch live shipments, assign drivers, and monitor IoT water conditions in real-time.</div>
+          </div>
+          <button class="new-order-btn" onclick="openNewOrderModal()">+ New Transport Order</button>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-tile warn">
+            <div class="stat-tile-count" id="statActive">0</div>
+            <div class="stat-tile-label">Active Orders</div>
+          </div>
+          <div class="stat-tile transit">
+            <div class="stat-tile-count" id="statTransit">0</div>
+            <div class="stat-tile-label">In Transit</div>
+          </div>
+          <div class="stat-tile done">
+            <div class="stat-tile-count" id="statDelivered">0</div>
+            <div class="stat-tile-label">Delivered</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-tile-count" id="statTotal">0</div>
+            <div class="stat-tile-label">Total Shipments</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div>
+            <div class="section-label-row">
+              <div class="section-label" style="margin-bottom:0;">Recent Active Orders</div>
+              <span class="link-sm" onclick="showView('orders', document.querySelector('[data-view=orders]'))">View All</span>
+            </div>
+            <div id="dashOrdersList"></div>
+          </div>
+
+          <div>
+            <div class="section-label-row">
+              <div class="section-label" style="margin-bottom:0;">Assigned Transport Personnel</div>
+              <span class="link-sm" onclick="showView('personnel', document.querySelector('[data-view=personnel]'))">Manage Personnel</span>
+            </div>
+            <div id="dashPersonnelList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: TRANSPORT ORDERS -->
+      <div class="view" id="view-orders">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h2 style="font-size:22px; font-weight:800;">Transport Shipments</h2>
+            <p class="soft" style="font-size:13px;">Manage fingerling deliveries and monitor vehicle sensor metrics.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openNewOrderModal()">+ New Transport Order</button>
+        </div>
+
+        <div class="card" style="overflow-x:auto;">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Tracking Code</th>
+                <th>Buyer / Farm</th>
+                <th>Personnel</th>
+                <th>IoT Unit</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- VIEW 3: TRANSPORT PERSONNEL -->
+      <div class="view" id="view-personnel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h2 style="font-size:22px; font-weight:800;">Transport Personnel</h2>
+            <p class="soft" style="font-size:13px;">Manage transport personnel accounts and mobile pairing credentials.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openInviteModal()">+ Add Personnel</button>
+        </div>
+
+        <div class="personnel-grid" id="activePersonnelGrid"></div>
+      </div>
+
+      <!-- VIEW 4: TELEMETRY HISTORY -->
+      <div class="view" id="view-history">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input placeholder="Search by tracking code, sensor type, or reading…" oninput="filterTelemetry(this.value)">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:18px;">
+          <button class="btn btn-primary" onclick="printHistory()">🖨 Print History Report</button>
+        </div>
+
+        <div id="teleList"></div>
+      </div>
+
+      <!-- VIEW 5: NOTIFICATIONS -->
+      <div class="view" id="view-notifications">
+        <div id="notifList"></div>
+      </div>
+
+      <!-- VIEW 6: FARM PROFILE -->
+      <div class="view" id="view-profile">
+        <div class="card" style="max-width:540px;">
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:22px;">
+            <div class="sidebar-avatar" style="width:58px; height:58px; font-size:19px;">🏢</div>
+            <div>
+              <div style="font-weight:800; font-size:17px;" id="profHatcheryName">Farm Owner</div>
+              <div class="faint" style="font-size:12.5px;" id="profEmail">seller@aquasource.ph</div>
+            </div>
+          </div>
+
+          <div class="detail-row2"><span>Contact Phone</span><span id="profPhone">—</span></div>
+          <div class="detail-row2"><span>Farm Address</span><span id="profAddress">—</span></div>
+          <div class="detail-row2"><span>BFAR Permit Status</span><span id="profPermitStatus">⏳ Pending Review</span></div>
+          <div class="detail-row2"><span>Active Drivers</span><span id="profActivePersonnel">0</span></div>
+          <div class="detail-row2"><span>Total Shipments</span><span id="profTotalDeliveries">0</span></div>
+
+          <button class="btn btn-outline btn-block" style="margin-top:22px;" onclick="openEditProfileModal()">Edit Profile</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ============ MODAL: NEW ORDER ============ -->
+  <div class="modal-overlay" id="newOrderModal">
+    <div class="modal-box wide">
+      <div class="modal-title">New Transport Order</div>
+      <div class="modal-sub">Assign a shipment to transport personnel for fingerling delivery.</div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Transport Personnel *</label>
+          <div class="select-wrap">
+            <div class="select-input placeholder" id="personnelSelect" onclick="toggleSelect('personnelOptions')">
+              Select transport personnel<span>▾</span>
+            </div>
+            <div class="select-options" id="personnelOptions"></div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Buyer / Destination Farm Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="buyerNameInput" placeholder="e.g. Green Water Tilapia Farm">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Aquatic Species *</label>
+          <div class="input-wrap">
+            <input class="input" id="speciesInput" value="Tilapia Fingerlings">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Quantity (pcs) *</label>
+          <div class="input-wrap">
+            <input class="input" id="qtyInput" type="number" placeholder="e.g. 3000" min="1">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Destination Farm Address *</label>
+          <div class="input-wrap">
+            <input class="input" id="destInput" placeholder="e.g. Carcar City, Cebu">
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Dispatch Date &amp; Time</label>
+          <div class="input-wrap">
+            <input class="input" id="dispatchInput" type="datetime-local">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:8px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeNewOrderModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="createOrder()">Create Order &amp; Generate Tracking Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: EDIT TRANSPORT ORDER ============ -->
+  <div class="modal-overlay" id="editOrderModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="modal-title" style="margin-bottom:0;">Edit Transport Order</div>
+        <button class="icon-btn" onclick="closeEditOrderModal()">✕</button>
+      </div>
+      <div class="modal-sub" id="editOrderCodeSub">Update details for Tracking Code</div>
+
+      <div class="field">
+        <label>Buyer / Receiving Farm Name *</label>
+        <div class="input-wrap">
+          <input class="input" id="editOrderBuyer" placeholder="e.g. Green Water Farms">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Species / Fingerling Type *</label>
+        <div class="input-wrap">
+          <input class="input" id="editOrderSpecies" placeholder="e.g. Tilapia Fingerlings">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Fingerling Quantity (pcs) *</label>
+        <div class="input-wrap">
+          <input class="input" id="editOrderQty" type="number" placeholder="e.g. 5000">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Delivery Farm Destination Address *</label>
+        <div class="input-wrap">
+          <input class="input" id="editOrderDest" placeholder="e.g. Carcar Fish Pond, Cebu">
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:20px;">
+        <label>Assigned Transport Personnel</label>
+        <div class="input-wrap">
+          <input class="input" id="editOrderPersonnel" placeholder="e.g. Ramon Cruz">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeEditOrderModal()">Cancel</button>
+        <button class="btn btn-primary" id="editOrderSubmitBtn" style="flex:1;" onclick="saveEditedOrder()">Save &amp; Update Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: ORDER DETAIL / LIVE MONITORING ============ -->
+  <div class="modal-overlay" id="orderDetailModal">
+    <div class="modal-box wide">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="modal-title" style="margin-bottom:0;">Live Vehicle Telemetry</div>
+        <button class="icon-btn" onclick="closeOrderDetail()">✕</button>
+      </div>
+      <div class="modal-sub" id="modalOrderBatchSub">Tracking #AQS-0000</div>
+
+      <div class="monitor-grid">
+        <div>
+          <div class="status-banner">
+            <div class="status-banner-ico" id="statusIco">🚚</div>
+            <div>
+              <div class="status-banner-title" id="statusTitle">In Transit</div>
+              <div class="status-banner-sub" id="statusSub">Shipment active</div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:16px 18px;">
+            <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:45%;"></div></div>
+            <div class="progress-steps">
+              <span class="done">Departed</span>
+              <span class="done">Halfway</span>
+              <span id="stepNear">Near Farm</span>
+              <span id="stepArrived">Delivered</span>
+            </div>
+          </div>
+
+          <div class="map-card" style="padding:0; overflow:hidden; border-radius:16px;">
+            <div id="sellerDetailMap" style="height:340px; width:100%; border-radius:16px;"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-label">Real-Time Water Quality</div>
+          <div class="wq-grid">
+            <div class="wq-card">
+              <div class="wq-top"><span class="wq-label">Turbidity</span><div class="wq-dot dot-green" id="wqDotTurb"></div></div>
+              <div class="wq-value" id="wqTurb">6<span class="wq-unit">NTU</span></div>
+              <div class="wq-status status-green" id="wqStatusTurb">Safe</div>
+            </div>
+
+            <div class="wq-card">
+              <div class="wq-top"><span class="wq-label">Dissolved O₂</span><div class="wq-dot dot-green" id="wqDotDO"></div></div>
+              <div class="wq-value" id="wqDO">6.7<span class="wq-unit">mg/L</span></div>
+              <div class="wq-status status-green" id="wqStatusDO">Safe</div>
+            </div>
+
+            <div class="wq-card">
+              <div class="wq-top"><span class="wq-label">pH Level</span><div class="wq-dot dot-green" id="wqDotPH"></div></div>
+              <div class="wq-value" id="wqPH">7.2</div>
+              <div class="wq-status status-green" id="wqStatusPH">Safe</div>
+            </div>
+
+            <div class="wq-card">
+              <div class="wq-top"><span class="wq-label">Temperature</span><div class="wq-dot dot-green" id="wqDotTemp"></div></div>
+              <div class="wq-value" id="wqTemp">29.2<span class="wq-unit">°C</span></div>
+              <div class="wq-status status-green" id="wqStatusTemp">Safe</div>
+            </div>
+          </div>
+
+          <div class="ai-card">
+            <div class="ai-head">
+              <div class="ai-badge">✦</div>
+              <div class="ai-title">AI Water Telemetry Advisor</div>
+            </div>
+            <div class="ai-text" id="aiText">All water parameters are within optimal biological limits for tilapia transport.</div>
+            <div class="ai-recs" id="aiRecs">
+              <div class="ai-rec"><span>▸</span><span>Maintain current aeration rate and transport speed.</span></div>
+            </div>
+            <div class="ai-foot">
+              <div class="ai-stat"><div class="ai-stat-label">Fish Stress Level</div><div class="ai-stat-value stress-low" id="aiStress">Low</div></div>
+              <div class="ai-stat"><div class="ai-stat-label">Model Confidence</div><div class="ai-stat-value" id="aiConfidence">96%</div></div>
+            </div>
+          </div>
+
+          <div class="section-label" style="margin-top:16px;">Shipment Info</div>
+          <div class="card">
+            <div class="detail-row2"><span>Tracking Code</span><span class="mono" id="dtCode">—</span></div>
+            <div class="detail-row2"><span>Buyer / Farm</span><span id="dtBuyer">—</span></div>
+            <div class="detail-row2"><span>Quantity</span><span id="dtQty">—</span></div>
+            <div class="detail-row2"><span>IoT Unit</span><span class="mono" id="dtUnit">—</span></div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="btn btn-outline" id="modalCancelBtn" style="flex:1; color:var(--critical); border-color:var(--critical);" onclick="cancelActiveOrder()">🚫 Cancel Shipment</button>
+            <button class="btn btn-primary" style="flex:1;" onclick="closeOrderDetail()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: CRITICAL WATER ALERT ============ -->
+  <div class="modal-overlay" id="criticalModal">
+    <div class="modal-box alert-modal">
+      <div class="alert-ico">⚠️</div>
+      <div class="alert-title">Water Quality Critical Alert</div>
+      <div class="alert-text">Dissolved oxygen dropped below safe limit (<b>3.1 mg/L</b>).</div>
+      <div class="alert-text">Automated aeration backup activated. Transport personnel notified.</div>
+      <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="closeCriticalModal()">Acknowledge Alert</button>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: ADD PERSONNEL ============ -->
+  <div class="modal-overlay" id="inviteModal">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <div class="modal-title" style="margin-bottom:0;">Add Transport Personnel</div>
+        <button class="icon-btn" onclick="closeInviteModal()">✕</button>
+      </div>
+      <div class="modal-sub">Register a transport driver for fingerling shipments.</div>
+      
+      <div class="form-grid2">
+        <div class="field">
+          <label>First Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="inviteFirstName" placeholder="e.g. Ramon">
+          </div>
+        </div>
+        <div class="field">
+          <label>Last Name *</label>
+          <div class="input-wrap">
+            <input class="input" id="inviteLastName" placeholder="e.g. Cruz">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid2">
+        <div class="field">
+          <label>Contact Number (Numbers only) *</label>
+          <div class="input-wrap">
+            <input class="input" id="invitePhone" type="tel" placeholder="0917 555 0101" oninput="this.value = this.value.replace(/[^0-9+\s\-()]/g, '')">
+          </div>
+        </div>
+        <div class="field">
+          <label>Driver Email Address *</label>
+          <div class="input-wrap">
+            <input class="input" id="inviteEmail" type="email" placeholder="driver@aquasource.ph">
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:20px;">
+        <label>Driver Password (min. 8 chars, 1 capital, 1 special char) *</label>
+        <div class="input-wrap">
+          <input class="input" id="invitePassword" type="password" placeholder="e.g. Driver#2026">
+          <button class="input-icon-btn" type="button" onclick="togglePass('invitePassword', this)">SHOW</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeInviteModal()">Cancel</button>
+        <button class="btn btn-primary" id="inviteSubmitBtn" style="flex:1;" onclick="sendInvite()">Save Driver</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: EDIT PROFILE ============ -->
+  <div class="modal-overlay" id="editProfileModal">
+    <div class="modal-box">
+      <div class="modal-title">Edit Farm Profile</div>
+      <div class="modal-sub">Update your business and contact information.</div>
+
+      <div class="field">
+        <label>Farm Business Name *</label>
+        <div class="input-wrap">
+          <input class="input" id="editHatcheryName" placeholder="Farm Name">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Contact Phone Number</label>
+        <div class="input-wrap">
+          <input class="input" id="editPhone" placeholder="+63 917 555 0101">
+        </div>
+      </div>
+
+      <div class="field" style="margin-bottom:20px;">
+        <label>Farm Physical Address</label>
+        <div class="input-wrap">
+          <input class="input" id="editAddress" placeholder="Cebu City, Philippines">
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeEditProfileModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveSellerProfile()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL: LOGOUT CONFIRMATION ============ -->
+  <div class="modal-overlay" id="logoutModal">
+    <div class="modal-box" style="text-align:center;">
+      <div style="font-size:36px; margin-bottom:10px;">🚪</div>
+      <div class="modal-title">Log out of AquaSource?</div>
+      <div class="modal-sub">You will need to sign in again to manage orders and monitor telemetry.</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="closeLogoutConfirm()">Cancel</button>
+        <button class="btn btn-critical" style="flex:1;" onclick="doLogout()">Log Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Printable Report Template -->
+  <div id="printReport">
+    <h2 style="font-family:'Poppins',sans-serif;">AquaSource — Telemetry History Report</h2>
+    <p style="color:#5B7A85; margin:6px 0 20px;">Generated: <span id="printDate"></span></p>
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+        <tr style="text-align:left; border-bottom:2px solid #0B5D7A;">
+          <th style="padding:8px 6px;">Tracking Code</th>
+          <th style="padding:8px 6px;">Sensor</th>
+          <th style="padding:8px 6px;">Timestamp</th>
+          <th style="padding:8px 6px;">Reading</th>
+          <th style="padding:8px 6px;">Status</th>
+        </tr>
+      </thead>
+      <tbody id="printTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- External Scripts -->
+  <script src="seller-firebase.js"></script>
+  <script src="seller-script.js"></script>
+</body>
+</html>
