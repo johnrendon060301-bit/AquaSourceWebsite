@@ -50,6 +50,25 @@ window.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'Enter') handleLoginSubmit();
     });
   }
+
+  // 3. Restore remembered session / email if previously selected
+  const rememberBox = document.getElementById('rememberBox');
+  const loginEmail = document.getElementById('loginEmail');
+  const isRemembered = localStorage.getItem('aquasource_remember_session') === 'true';
+  const savedEmail = localStorage.getItem('aquasource_remember_email');
+
+  if (isRemembered && savedEmail) {
+    if (loginEmail) {
+      loginEmail.value = savedEmail;
+    }
+    if (rememberBox) {
+      rememberBox.classList.add('checked');
+      rememberBox.textContent = '✓';
+    }
+    if (loginPass) {
+      loginPass.focus();
+    }
+  }
 });
 
 /* =========================================================================
@@ -97,6 +116,29 @@ async function handleLoginSubmit() {
 
     if (!fbAuth) {
       throw new Error('Firebase Authentication is not available.');
+    }
+
+    // Handle "Remember Session" configuration
+    const rememberBox = document.getElementById('rememberBox');
+    const isRemembered = rememberBox ? rememberBox.classList.contains('checked') : false;
+
+    if (fbAuth && firebase && firebase.auth && firebase.auth.Auth && firebase.auth.Auth.Persistence) {
+      try {
+        const persistence = isRemembered
+          ? firebase.auth.Auth.Persistence.LOCAL
+          : firebase.auth.Auth.Persistence.SESSION;
+        await fbAuth.setPersistence(persistence);
+      } catch (pErr) {
+        console.warn('Could not set auth persistence:', pErr);
+      }
+    }
+
+    if (isRemembered) {
+      localStorage.setItem('aquasource_remember_session', 'true');
+      localStorage.setItem('aquasource_remember_email', email);
+    } else {
+      localStorage.removeItem('aquasource_remember_session');
+      localStorage.removeItem('aquasource_remember_email');
     }
 
     // 1. Authenticate user credentials
