@@ -839,81 +839,137 @@ async function saveEditedOrder() {
 }
 
 /* =========================================================================
-   AUTOCOMPLETE & PLACE SEARCH SUGGESTIONS
+   GOOGLE MAPS STYLE PLACE AUTOCOMPLETE & PREDICTIONS
    ========================================================================= */
 
-const CEBU_AND_PH_PLACES = [
-  { name: 'Carcar City, Cebu', sub: 'Cebu, Central Visayas, Philippines', type: 'place' },
-  { name: 'Barangay Valladolid, Carcar City, Cebu', sub: 'Carcar Aquaculture Zone, Cebu', type: 'place' },
-  { name: 'Barangay Tuyom, Carcar City, Cebu', sub: 'Coastal Fishery Area, Carcar, Cebu', type: 'place' },
-  { name: 'Barangay Liburon, Carcar City, Cebu', sub: 'Carcar Inland Zone, Cebu', type: 'place' },
-  { name: 'Barangay Poblacion I-III, Carcar City, Cebu', sub: 'Carcar City Center, Cebu', type: 'place' },
-  { name: 'Barangay Bolinawan, Carcar City, Cebu', sub: 'Carcar, Cebu', type: 'place' },
-  { name: 'Barangay Ocaña, Carcar City, Cebu', sub: 'Carcar Highway Corridor, Cebu', type: 'place' },
-  { name: 'San Fernando, Cebu', sub: 'Cebu, Central Visayas, Philippines', type: 'place' },
-  { name: 'Barangay South Poblacion, San Fernando, Cebu', sub: 'San Fernando, Cebu', type: 'place' },
-  { name: 'Naga City, Cebu', sub: 'City of Naga, Cebu, Central Visayas', type: 'place' },
-  { name: 'Barangay Colon, Naga City, Cebu', sub: 'Naga Industrial & Coastal Zone, Cebu', type: 'place' },
-  { name: 'Toledo City, Cebu', sub: 'West Coast Aquaculture Zone, Cebu', type: 'place' },
-  { name: 'Barangay Bato, Toledo City, Cebu', sub: 'Toledo Fishery Corridor, Cebu', type: 'place' },
-  { name: 'Barili, Cebu', sub: 'Southwest Freshwater Zone, Cebu', type: 'place' },
-  { name: 'Barangay Japitan, Barili, Cebu', sub: 'Barili Coastal Farm, Cebu', type: 'place' },
-  { name: 'Argao, Cebu', sub: 'Southeast Coastal Municipality, Cebu', type: 'place' },
-  { name: 'Barangay Bogo, Argao, Cebu', sub: 'Argao Aquaculture Zone, Cebu', type: 'place' },
-  { name: 'Balamban, Cebu', sub: 'West Cebu Fishery & Coastal Hub', type: 'place' },
-  { name: 'Bogo City, Cebu', sub: 'North Cebu Fishery & Aquaculture Hub', type: 'place' },
-  { name: 'Danao City, Cebu', sub: 'Northeast Coast, Cebu', type: 'place' },
-  { name: 'Minglanilla, Cebu', sub: 'First District Metro Cebu, Cebu', type: 'place' },
-  { name: 'Talisay City, Cebu', sub: 'Metro Cebu South, Cebu', type: 'place' },
-  { name: 'SRP (South Road Properties), Cebu City', sub: 'Cebu City Coastal Dispatch, Cebu', type: 'place' },
-  { name: 'Cebu City, Cebu', sub: 'Central Visayas, Philippines', type: 'place' },
-  { name: 'Mandaue City, Cebu', sub: 'Metro Cebu, Central Visayas', type: 'place' },
-  { name: 'Lapu-Lapu City, Mactan Island, Cebu', sub: 'Mactan Island, Cebu', type: 'place' },
-  { name: 'Liloan, Cebu', sub: 'North Metro Cebu, Cebu', type: 'place' },
-  { name: 'Consolacion, Cebu', sub: 'North Metro Cebu, Cebu', type: 'place' },
-  { name: 'Compostela, Cebu', sub: 'Northeast Coast, Cebu', type: 'place' },
-  { name: 'Carmen, Cebu', sub: 'North Coastal Cebu', type: 'place' },
-  { name: 'Dumanjug, Cebu', sub: 'Southwest Coast, Cebu', type: 'place' },
-  { name: 'Moalboal, Cebu', sub: 'Southwest Marine Zone, Cebu', type: 'place' },
-  { name: 'Badian, Cebu', sub: 'Southwest Cebu', type: 'place' },
-  { name: 'Alegria, Cebu', sub: 'Southwest Cebu', type: 'place' },
-  { name: 'Dalaguete, Cebu', sub: 'Southeast Agri-Aquaculture, Cebu', type: 'place' },
-  { name: 'Sibonga, Cebu', sub: 'Southeast Coast, Cebu', type: 'place' },
-  { name: 'Alcoy, Cebu', sub: 'Southeast Coast, Cebu', type: 'place' },
-  { name: 'Oslob, Cebu', sub: 'Southern Coast, Cebu', type: 'place' },
-  { name: 'Bantayan Island, Cebu', sub: 'North Offshore Aquaculture Hub, Cebu', type: 'place' },
-  { name: 'Santa Fe, Bantayan Island, Cebu', sub: 'Bantayan, Cebu', type: 'place' },
-  { name: 'Madridejos, Bantayan Island, Cebu', sub: 'Bantayan, Cebu', type: 'place' },
-  { name: 'San Remigio, Cebu', sub: 'Northwest Coast, Cebu', type: 'place' },
-  { name: 'Medellin, Cebu', sub: 'North Tip, Cebu', type: 'place' },
-  { name: 'Daanbantayan, Cebu', sub: 'Northernmost Cebu', type: 'place' },
-  { name: 'Tagbilaran City, Bohol', sub: 'Bohol Province, Central Visayas', type: 'place' },
-  { name: 'Calape, Bohol', sub: 'Northwest Bohol Aquaculture Center', type: 'place' },
-  { name: 'Tubigon, Bohol', sub: 'West Bohol Fishery Hub', type: 'place' },
-  { name: 'Dumaguete City, Negros Oriental', sub: 'Negros Oriental, Central Visayas', type: 'place' },
-  { name: 'Bacolod City, Negros Occidental', sub: 'Western Visayas, Philippines', type: 'place' },
-  { name: 'Iloilo City, Iloilo', sub: 'Western Visayas, Philippines', type: 'place' }
-];
-
-const PRESET_BUYER_FARMS = [
-  { name: 'Carcar Inland Tilapia Farm', address: 'Barangay Valladolid, Carcar City, Cebu', sub: 'Tilapia Growout Pond · Carcar City, Cebu' },
-  { name: 'Carcar Aqua Agro Fishpond', address: 'Barangay Tuyom, Carcar City, Cebu', sub: 'Brackishwater & Freshwater · Carcar City, Cebu' },
-  { name: 'Green Water Tilapia Farm', address: 'Carcar City, Cebu', sub: 'Commercial Hatchery & Farm · Carcar City, Cebu' },
-  { name: 'San Fernando Aquaculture Haven', address: 'San Fernando, Cebu', sub: 'Freshwater Farm · San Fernando, Cebu' },
-  { name: 'Naga Tilapia Growout Facility', address: 'Naga City, Cebu', sub: 'Intensive Pond Facility · Naga City, Cebu' },
-  { name: 'Toledo Freshwater Fisheries', address: 'Toledo City, Cebu', sub: 'Tilapia Growout · Toledo City, Cebu' },
-  { name: 'Barili Tilapia & Catfish Farm', address: 'Barili, Cebu', sub: 'Aquaculture Nursery · Barili, Cebu' },
-  { name: 'Argao Coastal Aquaculture', address: 'Argao, Cebu', sub: 'Coastal Fishpond · Argao, Cebu' },
-  { name: 'Balamban Inland Fish Farm', address: 'Balamban, Cebu', sub: 'Freshwater Facility · Balamban, Cebu' },
-  { name: 'Bogo Brackishwater Aquafarm', address: 'Bogo City, Cebu', sub: 'North Aquaculture Hub · Bogo City, Cebu' },
-  { name: 'Danao Freshwater Hatchery & Growout', address: 'Danao City, Cebu', sub: 'Tilapia Nursery · Danao City, Cebu' },
-  { name: 'Talisay Tilapia Fish Ponds', address: 'Talisay City, Cebu', sub: 'Commercial Ponds · Talisay City, Cebu' },
-  { name: 'Minglanilla Aqua Breeders', address: 'Minglanilla, Cebu', sub: 'Breeding & Growout · Minglanilla, Cebu' },
-  { name: 'Dumanjug Tilapia Culture Farm', address: 'Dumanjug, Cebu', sub: 'Pond Aquaculture · Dumanjug, Cebu' },
-  { name: 'Bantayan Island Bangus & Tilapia Farm', address: 'Bantayan Island, Cebu', sub: 'Aquaculture Enterprise · Bantayan, Cebu' },
-  { name: 'Calape Fishpond Corporation', address: 'Calape, Bohol', sub: 'Commercial Fishery · Calape, Bohol' },
-  { name: 'Dumaguete Aquaculture Development', address: 'Dumaguete City, Negros Oriental', sub: 'Fishery Hub · Dumaguete City' },
-  { name: 'Bacolod Biofloc Tilapia Facility', address: 'Bacolod City, Negros Occidental', sub: 'Biofloc Growout · Bacolod City' }
+const GOOGLE_MAPS_PLACES = [
+  { main: 'San Fernando', sub: 'Cebu' },
+  { main: 'San Fernando', sub: 'Pampanga' },
+  { main: 'San Francisco', sub: 'CA, USA' },
+  { main: 'San Fernando', sub: 'Cebu City, Cebu' },
+  { main: 'San Fernando el Rey Parish', sub: 'Liloan, Cebu' },
+  { main: 'San Fernando', sub: 'La Union' },
+  { main: 'San Fernando', sub: 'Bukidnon' },
+  { main: 'San Francisco', sub: 'Camotes Islands, Cebu' },
+  { main: 'San Francisco', sub: 'Agusan del Sur' },
+  { main: 'San Jose', sub: 'Cebu City, Cebu' },
+  { main: 'San Jose', sub: 'Dinagat Islands' },
+  { main: 'San Jose', sub: 'Occidental Mindoro' },
+  { main: 'San Jose', sub: 'Antique' },
+  { main: 'San Jose', sub: 'CA, USA' },
+  { main: 'San Diego', sub: 'CA, USA' },
+  { main: 'San Antonio', sub: 'TX, USA' },
+  { main: 'San Juan', sub: 'Metro Manila' },
+  { main: 'San Juan', sub: 'La Union' },
+  { main: 'San Juan', sub: 'Siquijor' },
+  { main: 'San Mateo', sub: 'Rizal' },
+  { main: 'San Pedro', sub: 'Laguna' },
+  { main: 'San Pablo', sub: 'Laguna' },
+  { main: 'San Remigio', sub: 'Cebu' },
+  { main: 'San Remigio', sub: 'Antique' },
+  { main: 'San Carlos City', sub: 'Negros Occidental' },
+  { main: 'San Carlos City', sub: 'Pangasinan' },
+  { main: 'Carcar', sub: 'Cebu' },
+  { main: 'Carcar City', sub: 'Cebu' },
+  { main: 'Carcar Rotunda', sub: 'Carcar City, Cebu' },
+  { main: 'Valladolid', sub: 'Carcar City, Cebu' },
+  { main: 'Tuyom', sub: 'Carcar City, Cebu' },
+  { main: 'Liburon', sub: 'Carcar City, Cebu' },
+  { main: 'Poblacion I', sub: 'Carcar City, Cebu' },
+  { main: 'Poblacion II', sub: 'Carcar City, Cebu' },
+  { main: 'Poblacion III', sub: 'Carcar City, Cebu' },
+  { main: 'Bolinawan', sub: 'Carcar City, Cebu' },
+  { main: 'Ocaña', sub: 'Carcar City, Cebu' },
+  { main: 'Guadalupe', sub: 'Carcar City, Cebu' },
+  { main: 'Can-asujan', sub: 'Carcar City, Cebu' },
+  { main: 'Perrelos', sub: 'Carcar City, Cebu' },
+  { main: 'Naga', sub: 'Cebu' },
+  { main: 'Naga City', sub: 'Cebu' },
+  { main: 'Colon', sub: 'Naga City, Cebu' },
+  { main: 'Tinaan', sub: 'Naga City, Cebu' },
+  { main: 'Inoburan', sub: 'Naga City, Cebu' },
+  { main: 'Toledo', sub: 'Cebu' },
+  { main: 'Toledo City', sub: 'Cebu' },
+  { main: 'Bato', sub: 'Toledo City, Cebu' },
+  { main: 'Barili', sub: 'Cebu' },
+  { main: 'Japitan', sub: 'Barili, Cebu' },
+  { main: 'Argao', sub: 'Cebu' },
+  { main: 'Bogo', sub: 'Argao, Cebu' },
+  { main: 'Balamban', sub: 'Cebu' },
+  { main: 'Bogo', sub: 'Cebu' },
+  { main: 'Bogo City', sub: 'Cebu' },
+  { main: 'Danao', sub: 'Cebu' },
+  { main: 'Danao City', sub: 'Cebu' },
+  { main: 'Minglanilla', sub: 'Cebu' },
+  { main: 'Poblacion Ward 1', sub: 'Minglanilla, Cebu' },
+  { main: 'Talisay', sub: 'Cebu' },
+  { main: 'Talisay City', sub: 'Cebu' },
+  { main: 'SRP (South Road Properties)', sub: 'Cebu City, Cebu' },
+  { main: 'Cebu City', sub: 'Cebu' },
+  { main: 'Mandaue', sub: 'Cebu' },
+  { main: 'Mandaue City', sub: 'Cebu' },
+  { main: 'Lapu-Lapu City', sub: 'Cebu' },
+  { main: 'Liloan', sub: 'Cebu' },
+  { main: 'Consolacion', sub: 'Cebu' },
+  { main: 'Compostela', sub: 'Cebu' },
+  { main: 'Carmen', sub: 'Cebu' },
+  { main: 'Catmon', sub: 'Cebu' },
+  { main: 'Sogod', sub: 'Cebu' },
+  { main: 'Medellin', sub: 'Cebu' },
+  { main: 'Daanbantayan', sub: 'Cebu' },
+  { main: 'Bantayan', sub: 'Bantayan Island, Cebu' },
+  { main: 'Santa Fe', sub: 'Bantayan Island, Cebu' },
+  { main: 'Madridejos', sub: 'Bantayan Island, Cebu' },
+  { main: 'Dumanjug', sub: 'Cebu' },
+  { main: 'Ronda', sub: 'Cebu' },
+  { main: 'Alcantara', sub: 'Cebu' },
+  { main: 'Moalboal', sub: 'Cebu' },
+  { main: 'Badian', sub: 'Cebu' },
+  { main: 'Alegria', sub: 'Cebu' },
+  { main: 'Malabuyoc', sub: 'Cebu' },
+  { main: 'Ginatilan', sub: 'Cebu' },
+  { main: 'Samboan', sub: 'Cebu' },
+  { main: 'Santander', sub: 'Cebu' },
+  { main: 'Oslob', sub: 'Cebu' },
+  { main: 'Boljoon', sub: 'Cebu' },
+  { main: 'Alcoy', sub: 'Cebu' },
+  { main: 'Dalaguete', sub: 'Cebu' },
+  { main: 'Sibonga', sub: 'Cebu' },
+  { main: 'Aloguinsan', sub: 'Cebu' },
+  { main: 'Pinamungajan', sub: 'Cebu' },
+  { main: 'Asturias', sub: 'Cebu' },
+  { main: 'Tuburan', sub: 'Cebu' },
+  { main: 'Tabuelan', sub: 'Cebu' },
+  { main: 'Tabogon', sub: 'Cebu' },
+  { main: 'Borbon', sub: 'Cebu' },
+  { main: 'Cordova', sub: 'Cebu' },
+  { main: 'Tagbilaran City', sub: 'Bohol' },
+  { main: 'Panglao', sub: 'Bohol' },
+  { main: 'Calape', sub: 'Bohol' },
+  { main: 'Tubigon', sub: 'Bohol' },
+  { main: 'Ubay', sub: 'Bohol' },
+  { main: 'Talibon', sub: 'Bohol' },
+  { main: 'Dumaguete City', sub: 'Negros Oriental' },
+  { main: 'Bais City', sub: 'Negros Oriental' },
+  { main: 'Tanjay City', sub: 'Negros Oriental' },
+  { main: 'Bacolod City', sub: 'Negros Occidental' },
+  { main: 'Iloilo City', sub: 'Iloilo' },
+  { main: 'Roxas City', sub: 'Capiz' },
+  { main: 'Kalibo', sub: 'Aklan' },
+  { main: 'Tacloban City', sub: 'Leyte' },
+  { main: 'Ormoc City', sub: 'Leyte' },
+  { main: 'Manila', sub: 'Metro Manila' },
+  { main: 'Quezon City', sub: 'Metro Manila' },
+  { main: 'Makati', sub: 'Metro Manila' },
+  { main: 'Pasig', sub: 'Metro Manila' },
+  { main: 'Taguig', sub: 'Metro Manila' },
+  { main: 'Davao City', sub: 'Davao del Sur' },
+  { main: 'Cagayan de Oro', sub: 'Misamis Oriental' },
+  { main: 'General Santos', sub: 'South Cotabato' },
+  { main: 'Zamboanga City', sub: 'Zamboanga del Sur' },
+  { main: 'Angeles City', sub: 'Pampanga' },
+  { main: 'Baguio City', sub: 'Benguet' },
+  { main: 'Dagupan City', sub: 'Pangasinan' }
 ];
 
 function hideAllAutocomplete() {
@@ -923,90 +979,46 @@ function hideAllAutocomplete() {
   });
 }
 
-function highlightMatch(text, query) {
-  if (!query) return escapeHtml(text);
-  const escapedQ = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escapedQ})`, 'gi');
-  return escapeHtml(text).replace(regex, '<mark>$1</mark>');
-}
+function getGoogleMapsPlacePredictions(query) {
+  const rawQ = (query || '').trim().toLowerCase();
+  if (!rawQ || rawQ.length === 0) return [];
 
-function getBuyerFarmSuggestions(query) {
-  const q = (query || '').toLowerCase().trim();
-  const list = [];
+  const tokens = rawQ.split(/\s+/).filter(Boolean);
   const seen = new Set();
+  const results = [];
 
-  // 1. Add matching buyers from past orders in the system
-  if (Array.isArray(orders)) {
-    orders.forEach(o => {
-      if (o.buyer && !seen.has(o.buyer.toLowerCase())) {
-        seen.add(o.buyer.toLowerCase());
-        list.push({
-          name: o.buyer,
-          address: o.dest || '',
-          sub: o.dest ? `Past Order Destination: ${o.dest}` : 'Aquaculture Buyer / Farm',
-          type: 'buyer'
-        });
+  // Prefix & token matching algorithm for Google Maps prediction
+  for (const p of GOOGLE_MAPS_PLACES) {
+    const key = (p.main + ' ' + (p.sub || '')).toLowerCase();
+    const mainWords = p.main.toLowerCase().split(/\s+/);
+    const allWords = key.split(/[\s,]+/);
+
+    // Check if all query tokens match either the whole phrase or individual word prefixes
+    let allTokensMatch = true;
+    for (const t of tokens) {
+      const hasPrefixMatch = allWords.some(w => w.startsWith(t));
+      const hasSubstringMatch = key.includes(t);
+      if (!hasPrefixMatch && !hasSubstringMatch) {
+        allTokensMatch = false;
+        break;
       }
-    });
-  }
-
-  // 2. Add preset buyer farms
-  PRESET_BUYER_FARMS.forEach(f => {
-    if (!seen.has(f.name.toLowerCase())) {
-      seen.add(f.name.toLowerCase());
-      list.push({ ...f, type: 'buyer' });
     }
-  });
 
-  if (!q) {
-    return list.slice(0, 6);
+    if (allTokensMatch) {
+      const itemKey = p.main.toLowerCase() + '|' + (p.sub || '').toLowerCase();
+      if (!seen.has(itemKey)) {
+        seen.add(itemKey);
+        results.push(p);
+      }
+    }
+
+    if (results.length >= 7) break;
   }
 
-  return list.filter(item => {
-    return item.name.toLowerCase().includes(q) ||
-      (item.address && item.address.toLowerCase().includes(q)) ||
-      (item.sub && item.sub.toLowerCase().includes(q));
-  }).slice(0, 8);
+  return results;
 }
 
-function getPlaceSuggestions(query) {
-  const q = (query || '').toLowerCase().trim();
-  const list = [];
-  const seen = new Set();
-
-  // 1. Add matching destinations from past orders
-  if (Array.isArray(orders)) {
-    orders.forEach(o => {
-      if (o.dest && !seen.has(o.dest.toLowerCase())) {
-        seen.add(o.dest.toLowerCase());
-        list.push({
-          name: o.dest,
-          sub: o.buyer ? `Previous Delivery for ${o.buyer}` : 'Known Aquaculture Destination',
-          type: 'place'
-        });
-      }
-    });
-  }
-
-  // 2. Add places from database
-  CEBU_AND_PH_PLACES.forEach(p => {
-    if (!seen.has(p.name.toLowerCase())) {
-      seen.add(p.name.toLowerCase());
-      list.push(p);
-    }
-  });
-
-  if (!q) {
-    return list.slice(0, 7);
-  }
-
-  return list.filter(item => {
-    return item.name.toLowerCase().includes(q) ||
-      (item.sub && item.sub.toLowerCase().includes(q));
-  }).slice(0, 8);
-}
-
-function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
+function setupAutocomplete(inputId, dropdownId) {
   const input = document.getElementById(inputId);
   const dropdown = document.getElementById(dropdownId);
   if (!input || !dropdown) return;
@@ -1014,7 +1026,7 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
   let selectedIndex = -1;
   let debounceTimer = null;
 
-  function renderList(items, q) {
+  function renderPredictions(items) {
     if (!items || items.length === 0) {
       dropdown.style.display = 'none';
       dropdown.innerHTML = '';
@@ -1023,15 +1035,19 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
     }
 
     selectedIndex = -1;
-    const icoSvg = type === 'buyer' ? ICONS.box : ICONS.pin;
 
     dropdown.innerHTML = items.map((item, idx) => {
       return `
         <div class="autocomplete-item" data-index="${idx}">
-          <div class="autocomplete-ico">${icoSvg}</div>
+          <div class="autocomplete-ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
           <div class="autocomplete-content">
-            <div class="autocomplete-title">${highlightMatch(item.name, q)}</div>
-            <div class="autocomplete-sub">${escapeHtml(item.sub || item.address || (type === 'buyer' ? 'Aquaculture Farm' : 'Location'))}</div>
+            <span class="gmap-main">${escapeHtml(item.main)}</span>
+            ${item.sub ? `<span class="gmap-sub">${escapeHtml(item.sub)}</span>` : ''}
           </div>
         </div>
       `;
@@ -1039,7 +1055,7 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
 
     dropdown.style.display = 'flex';
 
-    // Click handler for items
+    // Click selection
     dropdown.querySelectorAll('.autocomplete-item').forEach((el, idx) => {
       el.addEventListener('mousedown', (e) => {
         e.preventDefault();
@@ -1050,16 +1066,8 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
 
   function selectItem(item) {
     if (!item) return;
-    input.value = item.name;
-
-    // If a buyer farm with a known address is selected, auto-fill the destination address if empty
-    if (type === 'buyer' && item.address && pairedAddressInputId) {
-      const pairedInput = document.getElementById(pairedAddressInputId);
-      if (pairedInput && (!pairedInput.value || pairedInput.value.trim() === '')) {
-        pairedInput.value = item.address;
-      }
-    }
-
+    const fullText = item.sub ? `${item.main}, ${item.sub}` : item.main;
+    input.value = fullText;
     dropdown.style.display = 'none';
     dropdown.innerHTML = '';
     selectedIndex = -1;
@@ -1075,40 +1083,42 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
     });
   }
 
-  input.addEventListener('focus', () => {
-    const q = input.value.trim();
-    const items = type === 'buyer' ? getBuyerFarmSuggestions(q) : getPlaceSuggestions(q);
-    renderList(items, q);
-  });
-
   input.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const q = input.value.trim();
-    const items = type === 'buyer' ? getBuyerFarmSuggestions(q) : getPlaceSuggestions(q);
-    renderList(items, q);
 
-    // If typing place and query is >= 3 chars, perform debounced online lookup for real-time fallback
-    if (type === 'place' && q.length >= 3 && navigator.onLine) {
+    if (!q || q.length === 0) {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
+      return;
+    }
+
+    const localMatches = getGoogleMapsPlacePredictions(q);
+    renderPredictions(localMatches);
+
+    // Real-time geocoding query fallback if online
+    if (q.length >= 2 && navigator.onLine) {
       debounceTimer = setTimeout(() => {
-        fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q + ' Philippines')}&limit=4&lat=10.3157&lon=123.8854`)
+        fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=10.3157&lon=123.8854`)
           .then(res => res.json())
           .then(data => {
-            if (data && data.features && data.features.length > 0 && input === document.activeElement) {
+            if (data && data.features && data.features.length > 0 && input === document.activeElement && input.value.trim().length > 0) {
               const onlineItems = data.features.map(f => {
                 const props = f.properties || {};
-                const name = [props.name, props.city || props.county || props.district, props.state].filter(Boolean).join(', ');
-                const sub = [props.street, props.country].filter(Boolean).join(' · ') || 'Location, Philippines';
-                return { name: name || props.name, sub: sub, type: 'place' };
-              }).filter(oi => oi.name && !items.some(local => local.name.toLowerCase() === oi.name.toLowerCase()));
+                const mainName = props.name || props.street || props.city;
+                const subParts = [props.city, props.state || props.county, props.country].filter(s => s && s !== mainName);
+                const subName = subParts.join(', ');
+                return { main: mainName, sub: subName };
+              }).filter(oi => oi.main && !localMatches.some(lm => lm.main.toLowerCase() === oi.main.toLowerCase()));
 
               if (onlineItems.length > 0) {
-                const combined = [...items, ...onlineItems].slice(0, 8);
-                renderList(combined, q);
+                const combined = [...localMatches, ...onlineItems].slice(0, 7);
+                renderPredictions(combined);
               }
             }
           })
           .catch(() => {});
-      }, 350);
+      }, 300);
     }
   });
 
@@ -1127,8 +1137,10 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
     } else if (e.key === 'Enter') {
       if (selectedIndex >= 0 && selectedIndex < itemEls.length) {
         e.preventDefault();
-        const currentItems = type === 'buyer' ? getBuyerFarmSuggestions(input.value.trim()) : getPlaceSuggestions(input.value.trim());
-        selectItem(currentItems[selectedIndex]);
+        const currentMatches = getGoogleMapsPlacePredictions(input.value.trim());
+        if (currentMatches[selectedIndex]) {
+          selectItem(currentMatches[selectedIndex]);
+        }
       }
     } else if (e.key === 'Escape') {
       dropdown.style.display = 'none';
@@ -1145,10 +1157,10 @@ function setupAutocomplete(inputId, dropdownId, type, pairedAddressInputId) {
 }
 
 function initOrderAutocomplete() {
-  setupAutocomplete('buyerNameInput', 'buyerNameDropdown', 'buyer', 'destInput');
-  setupAutocomplete('destInput', 'destDropdown', 'place', null);
-  setupAutocomplete('editOrderBuyer', 'editBuyerDropdown', 'buyer', 'editOrderDest');
-  setupAutocomplete('editOrderDest', 'editDestDropdown', 'place', null);
+  setupAutocomplete('buyerNameInput', 'buyerNameDropdown');
+  setupAutocomplete('destInput', 'destDropdown');
+  setupAutocomplete('editOrderBuyer', 'editBuyerDropdown');
+  setupAutocomplete('editOrderDest', 'editDestDropdown');
 
   // Close suggestions when clicking outside
   document.addEventListener('click', (e) => {
