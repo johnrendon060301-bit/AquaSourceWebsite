@@ -153,10 +153,11 @@
             <input class="input" id="signupPhone" type="tel" placeholder="0917 555 0101" oninput="this.value = this.value.replace(/[^0-9+\s\-()]/g, '')">
           </div>
         </div>
-        <div class="field">
+        <div class="field" style="position:relative;">
           <label>Farm Physical Address *</label>
-          <div class="input-wrap">
-            <input class="input" id="signupAddress" placeholder="e.g. Brgy. Looc, Cebu City">
+          <div class="input-wrap autocomplete-wrap">
+            <input class="input" id="signupAddress" placeholder="e.g. Brgy. Looc, Cebu City" autocomplete="off">
+            <div class="autocomplete-dropdown" id="signupAddressDropdown" style="display:none;"></div>
           </div>
         </div>
       </div>
@@ -313,10 +314,11 @@
             <input class="input" id="editAppPhone" type="tel" placeholder="0917 555 0101" oninput="this.value = this.value.replace(/[^0-9+\s\-()]/g, '')">
           </div>
         </div>
-        <div class="field">
+        <div class="field" style="position:relative;">
           <label>Farm Physical Address *</label>
-          <div class="input-wrap">
-            <input class="input" id="editAppAddress" placeholder="Physical Farm Address">
+          <div class="input-wrap autocomplete-wrap">
+            <input class="input" id="editAppAddress" placeholder="Physical Farm Address" autocomplete="off">
+            <div class="autocomplete-dropdown" id="editAppAddressDropdown" style="display:none;"></div>
           </div>
         </div>
       </div>

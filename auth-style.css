@@ -562,3 +562,117 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ============ GOOGLE MAPS STYLE PLACE AUTOCOMPLETE ============ */
+.autocomplete-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.06);
+  z-index: 1050;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  animation: gmapDropFade 0.15s ease-out;
+}
+
+.autocomplete-dropdown.drop-up {
+  top: auto;
+  bottom: calc(100% + 6px);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.15), 0 -2px 8px rgba(0, 0, 0, 0.06);
+  animation: gmapDropFadeUp 0.15s ease-out;
+}
+
+@keyframes gmapDropFade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gmapDropFadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.autocomplete-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-track {
+  background: #F8FAFC;
+  border-radius: 8px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 8px;
+}
+
+.autocomplete-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  user-select: none;
+  font-size: 13.5px;
+  color: #202124;
+  text-align: left;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+  background: #F1F3F4;
+}
+
+.autocomplete-item:active {
+  background: #E8EAED;
+}
+
+.autocomplete-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  color: #5F6368;
+  flex-shrink: 0;
+}
+
+.autocomplete-content {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.gmap-main {
+  font-weight: 700;
+  color: #202124;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+
+.gmap-sub {
+  font-weight: 400;
+  color: #70757A;
+  font-size: 13px;
+  line-height: 1.35;
+}
+

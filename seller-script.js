@@ -1026,6 +1026,29 @@ function setupAutocomplete(inputId, dropdownId) {
   let selectedIndex = -1;
   let debounceTimer = null;
 
+  function positionDropdown() {
+    const rect = input.getBoundingClientRect();
+    const modalBox = input.closest('.modal-box');
+    let shouldDropUp = false;
+
+    if (modalBox) {
+      const modalRect = modalBox.getBoundingClientRect();
+      const spaceBelow = modalRect.bottom - rect.bottom;
+      const spaceAbove = rect.top - modalRect.top;
+      if (spaceBelow < 220 && spaceAbove > 140) {
+        shouldDropUp = true;
+      }
+    } else {
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      if (spaceBelow < 240 && spaceAbove > spaceBelow) {
+        shouldDropUp = true;
+      }
+    }
+
+    dropdown.classList.toggle('drop-up', shouldDropUp);
+  }
+
   function renderPredictions(items) {
     if (!items || items.length === 0) {
       dropdown.style.display = 'none';
@@ -1053,6 +1076,7 @@ function setupAutocomplete(inputId, dropdownId) {
       `;
     }).join('');
 
+    positionDropdown();
     dropdown.style.display = 'flex';
 
     // Click selection
@@ -1082,6 +1106,16 @@ function setupAutocomplete(inputId, dropdownId) {
       }
     });
   }
+
+  input.addEventListener('focus', () => {
+    const q = input.value.trim();
+    if (q.length > 0) {
+      const localMatches = getGoogleMapsPlacePredictions(q);
+      if (localMatches.length > 0) {
+        renderPredictions(localMatches);
+      }
+    }
+  });
 
   input.addEventListener('input', () => {
     clearTimeout(debounceTimer);
@@ -1161,6 +1195,7 @@ function initOrderAutocomplete() {
   setupAutocomplete('destInput', 'destDropdown');
   setupAutocomplete('editOrderBuyer', 'editBuyerDropdown');
   setupAutocomplete('editOrderDest', 'editDestDropdown');
+  setupAutocomplete('editAddress', 'editAddressDropdown');
 
   // Close suggestions when clicking outside
   document.addEventListener('click', (e) => {
@@ -1233,7 +1268,29 @@ function toggleSelect(id) {
     if (el.id !== id) el.classList.remove('show');
   });
   const target = document.getElementById(id);
-  if (target) target.classList.toggle('show');
+  if (target) {
+    const isShowing = target.classList.contains('show');
+    if (!isShowing) {
+      const wrap = target.closest('.select-wrap');
+      if (wrap) {
+        const rect = wrap.getBoundingClientRect();
+        const modalBox = wrap.closest('.modal-box');
+        let shouldDropUp = false;
+        if (modalBox) {
+          const modalRect = modalBox.getBoundingClientRect();
+          const spaceBelow = modalRect.bottom - rect.bottom;
+          const spaceAbove = rect.top - modalRect.top;
+          if (spaceBelow < 200 && spaceAbove > 140) {
+            shouldDropUp = true;
+          }
+        }
+        target.classList.toggle('drop-up', shouldDropUp);
+      }
+      target.classList.add('show');
+    } else {
+      target.classList.remove('show');
+    }
+  }
 }
 
 function pickPersonnel(name, id) {

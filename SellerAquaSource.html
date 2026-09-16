@@ -555,10 +555,11 @@
         </div>
       </div>
 
-      <div class="field" style="margin-bottom:20px;">
+      <div class="field" style="margin-bottom:20px; position:relative;">
         <label>Farm Physical Address</label>
-        <div class="input-wrap">
-          <input class="input" id="editAddress" placeholder="Cebu City, Philippines">
+        <div class="input-wrap autocomplete-wrap">
+          <input class="input" id="editAddress" placeholder="Cebu City, Philippines" autocomplete="off">
+          <div class="autocomplete-dropdown" id="editAddressDropdown" style="display:none;"></div>
         </div>
       </div>
 

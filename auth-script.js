@@ -74,6 +74,9 @@ window.addEventListener('DOMContentLoaded', () => {
       rememberBox.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
     }
   }
+
+  // 4. Initialize Place Autocomplete for address fields
+  initAddressAutocomplete();
 });
 
 /* =========================================================================
@@ -1009,3 +1012,324 @@ async function handleSaveApplicationEdit() {
     }
   }
 }
+
+/* =========================================================================
+   GOOGLE MAPS STYLE PLACE AUTOCOMPLETE
+   ========================================================================= */
+
+const GOOGLE_MAPS_PLACES = [
+  { main: 'Carcar City', sub: 'Cebu' },
+  { main: 'Carcar Fish Pond', sub: 'Carcar City, Cebu' },
+  { main: 'Carcar Public Market', sub: 'Poblacion I, Carcar City, Cebu' },
+  { main: 'Carcar Tilapia Hatchery Center', sub: 'Carcar City, Cebu' },
+  { main: 'Carcar City Hall', sub: 'Poblacion, Carcar City, Cebu' },
+  { main: 'Cebu City', sub: 'Cebu' },
+  { main: 'Talisay City', sub: 'Cebu' },
+  { main: 'Toledo City', sub: 'Cebu' },
+  { main: 'Naga City', sub: 'Cebu' },
+  { main: 'Danao City', sub: 'Cebu' },
+  { main: 'Bogo City', sub: 'Cebu' },
+  { main: 'San Fernando', sub: 'Cebu' },
+  { main: 'Minglanilla', sub: 'Cebu' },
+  { main: 'Argao', sub: 'Cebu' },
+  { main: 'Barili', sub: 'Cebu' },
+  { main: 'Balamban', sub: 'Cebu' },
+  { main: 'Mandaue City', sub: 'Cebu' },
+  { main: 'Lapu-Lapu City', sub: 'Cebu' },
+  { main: 'Liloan', sub: 'Cebu' },
+  { main: 'Consolacion', sub: 'Cebu' },
+  { main: 'Compostela', sub: 'Cebu' },
+  { main: 'Carmen', sub: 'Cebu' },
+  { main: 'Catmon', sub: 'Cebu' },
+  { main: 'Sogod', sub: 'Cebu' },
+  { main: 'Medellin', sub: 'Cebu' },
+  { main: 'Daanbantayan', sub: 'Cebu' },
+  { main: 'Bantayan', sub: 'Bantayan Island, Cebu' },
+  { main: 'Santa Fe', sub: 'Bantayan Island, Cebu' },
+  { main: 'Madridejos', sub: 'Bantayan Island, Cebu' },
+  { main: 'Dumanjug', sub: 'Cebu' },
+  { main: 'Ronda', sub: 'Cebu' },
+  { main: 'Alcantara', sub: 'Cebu' },
+  { main: 'Moalboal', sub: 'Cebu' },
+  { main: 'Badian', sub: 'Cebu' },
+  { main: 'Alegria', sub: 'Cebu' },
+  { main: 'Malabuyoc', sub: 'Cebu' },
+  { main: 'Ginatilan', sub: 'Cebu' },
+  { main: 'Samboan', sub: 'Cebu' },
+  { main: 'Santander', sub: 'Cebu' },
+  { main: 'Oslob', sub: 'Cebu' },
+  { main: 'Boljoon', sub: 'Cebu' },
+  { main: 'Alcoy', sub: 'Cebu' },
+  { main: 'Dalaguete', sub: 'Cebu' },
+  { main: 'Sibonga', sub: 'Cebu' },
+  { main: 'Aloguinsan', sub: 'Cebu' },
+  { main: 'Pinamungajan', sub: 'Cebu' },
+  { main: 'Asturias', sub: 'Cebu' },
+  { main: 'Tuburan', sub: 'Cebu' },
+  { main: 'Tabuelan', sub: 'Cebu' },
+  { main: 'Tabogon', sub: 'Cebu' },
+  { main: 'Borbon', sub: 'Cebu' },
+  { main: 'Cordova', sub: 'Cebu' },
+  { main: 'Tagbilaran City', sub: 'Bohol' },
+  { main: 'Panglao', sub: 'Bohol' },
+  { main: 'Calape', sub: 'Bohol' },
+  { main: 'Tubigon', sub: 'Bohol' },
+  { main: 'Ubay', sub: 'Bohol' },
+  { main: 'Talibon', sub: 'Bohol' },
+  { main: 'Dumaguete City', sub: 'Negros Oriental' },
+  { main: 'Bais City', sub: 'Negros Oriental' },
+  { main: 'Tanjay City', sub: 'Negros Oriental' },
+  { main: 'Bacolod City', sub: 'Negros Occidental' },
+  { main: 'Iloilo City', sub: 'Iloilo' },
+  { main: 'Roxas City', sub: 'Capiz' },
+  { main: 'Kalibo', sub: 'Aklan' },
+  { main: 'Tacloban City', sub: 'Leyte' },
+  { main: 'Ormoc City', sub: 'Leyte' },
+  { main: 'Manila', sub: 'Metro Manila' },
+  { main: 'Quezon City', sub: 'Metro Manila' },
+  { main: 'Makati', sub: 'Metro Manila' },
+  { main: 'Pasig', sub: 'Metro Manila' },
+  { main: 'Taguig', sub: 'Metro Manila' },
+  { main: 'Davao City', sub: 'Davao del Sur' },
+  { main: 'Cagayan de Oro', sub: 'Misamis Oriental' },
+  { main: 'General Santos', sub: 'South Cotabato' },
+  { main: 'Zamboanga City', sub: 'Zamboanga del Sur' },
+  { main: 'Angeles City', sub: 'Pampanga' },
+  { main: 'Baguio City', sub: 'Benguet' },
+  { main: 'Dagupan City', sub: 'Pangasinan' }
+];
+
+function hideAllAuthAutocomplete() {
+  document.querySelectorAll('.autocomplete-dropdown').forEach(el => {
+    el.style.display = 'none';
+    el.innerHTML = '';
+  });
+}
+
+function getGoogleMapsPlacePredictions(query) {
+  const rawQ = (query || '').trim().toLowerCase();
+  if (!rawQ || rawQ.length === 0) return [];
+
+  const tokens = rawQ.split(/\s+/).filter(Boolean);
+  const seen = new Set();
+  const results = [];
+
+  for (const p of GOOGLE_MAPS_PLACES) {
+    const key = (p.main + ' ' + (p.sub || '')).toLowerCase();
+    const allWords = key.split(/[\s,]+/);
+
+    let allTokensMatch = true;
+    for (const t of tokens) {
+      const hasPrefixMatch = allWords.some(w => w.startsWith(t));
+      const hasSubstringMatch = key.includes(t);
+      if (!hasPrefixMatch && !hasSubstringMatch) {
+        allTokensMatch = false;
+        break;
+      }
+    }
+
+    if (allTokensMatch) {
+      const itemKey = p.main.toLowerCase() + '|' + (p.sub || '').toLowerCase();
+      if (!seen.has(itemKey)) {
+        seen.add(itemKey);
+        results.push(p);
+      }
+    }
+
+    if (results.length >= 7) break;
+  }
+
+  return results;
+}
+
+function escapeHtmlAuth(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function setupAuthAutocomplete(inputId, dropdownId) {
+  const input = document.getElementById(inputId);
+  const dropdown = document.getElementById(dropdownId);
+  if (!input || !dropdown) return;
+
+  let selectedIndex = -1;
+  let debounceTimer = null;
+
+  function positionDropdown() {
+    const rect = input.getBoundingClientRect();
+    const modalBox = input.closest('.modal-box');
+    let shouldDropUp = false;
+
+    if (modalBox) {
+      const modalRect = modalBox.getBoundingClientRect();
+      const spaceBelow = modalRect.bottom - rect.bottom;
+      const spaceAbove = rect.top - modalRect.top;
+      if (spaceBelow < 220 && spaceAbove > 140) {
+        shouldDropUp = true;
+      }
+    } else {
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      if (spaceBelow < 240 && spaceAbove > spaceBelow) {
+        shouldDropUp = true;
+      }
+    }
+
+    dropdown.classList.toggle('drop-up', shouldDropUp);
+  }
+
+  function renderPredictions(items) {
+    if (!items || items.length === 0) {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
+      selectedIndex = -1;
+      return;
+    }
+
+    selectedIndex = -1;
+
+    dropdown.innerHTML = items.map((item, idx) => {
+      return `
+        <div class="autocomplete-item" data-index="${idx}">
+          <div class="autocomplete-ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F6368" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <div class="autocomplete-content">
+            <span class="gmap-main">${escapeHtmlAuth(item.main)}</span>
+            ${item.sub ? `<span class="gmap-sub">${escapeHtmlAuth(item.sub)}</span>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    positionDropdown();
+    dropdown.style.display = 'flex';
+
+    dropdown.querySelectorAll('.autocomplete-item').forEach((el, idx) => {
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectItem(items[idx]);
+      });
+    });
+  }
+
+  function selectItem(item) {
+    if (!item) return;
+    const fullText = item.sub ? `${item.main}, ${item.sub}` : item.main;
+    input.value = fullText;
+    dropdown.style.display = 'none';
+    dropdown.innerHTML = '';
+    selectedIndex = -1;
+  }
+
+  function updateSelection() {
+    const itemEls = dropdown.querySelectorAll('.autocomplete-item');
+    itemEls.forEach((el, idx) => {
+      el.classList.toggle('selected', idx === selectedIndex);
+      if (idx === selectedIndex) {
+        el.scrollIntoView({ block: 'nearest' });
+      }
+    });
+  }
+
+  input.addEventListener('focus', () => {
+    const q = input.value.trim();
+    if (q.length > 0) {
+      const localMatches = getGoogleMapsPlacePredictions(q);
+      if (localMatches.length > 0) {
+        renderPredictions(localMatches);
+      }
+    }
+  });
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const q = input.value.trim();
+
+    if (!q || q.length === 0) {
+      dropdown.style.display = 'none';
+      dropdown.innerHTML = '';
+      return;
+    }
+
+    const localMatches = getGoogleMapsPlacePredictions(q);
+    renderPredictions(localMatches);
+
+    if (q.length >= 2 && navigator.onLine) {
+      debounceTimer = setTimeout(() => {
+        fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=10.3157&lon=123.8854`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && data.features && data.features.length > 0 && input === document.activeElement && input.value.trim().length > 0) {
+              const onlineItems = data.features.map(f => {
+                const props = f.properties || {};
+                const mainName = props.name || props.street || props.city;
+                const subParts = [props.city, props.state || props.county, props.country].filter(s => s && s !== mainName);
+                const subName = subParts.join(', ');
+                return { main: mainName, sub: subName };
+              }).filter(oi => oi.main && !localMatches.some(lm => lm.main.toLowerCase() === oi.main.toLowerCase()));
+
+              if (onlineItems.length > 0) {
+                const combined = [...localMatches, ...onlineItems].slice(0, 7);
+                renderPredictions(combined);
+              }
+            }
+          })
+          .catch(() => {});
+      }, 300);
+    }
+  });
+
+  input.addEventListener('keydown', (e) => {
+    const itemEls = dropdown.querySelectorAll('.autocomplete-item');
+    if (dropdown.style.display === 'none' || itemEls.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex + 1) % itemEls.length;
+      updateSelection();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      selectedIndex = (selectedIndex - 1 + itemEls.length) % itemEls.length;
+      updateSelection();
+    } else if (e.key === 'Enter') {
+      if (selectedIndex >= 0 && selectedIndex < itemEls.length) {
+        e.preventDefault();
+        const currentMatches = getGoogleMapsPlacePredictions(input.value.trim());
+        if (currentMatches[selectedIndex]) {
+          selectItem(currentMatches[selectedIndex]);
+        }
+      }
+    } else if (e.key === 'Escape') {
+      dropdown.style.display = 'none';
+      selectedIndex = -1;
+    }
+  });
+
+  input.addEventListener('blur', () => {
+    setTimeout(() => {
+      dropdown.style.display = 'none';
+      selectedIndex = -1;
+    }, 200);
+  });
+}
+
+function initAddressAutocomplete() {
+  setupAuthAutocomplete('signupAddress', 'signupAddressDropdown');
+  setupAuthAutocomplete('editAppAddress', 'editAppAddressDropdown');
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.autocomplete-wrap')) {
+      hideAllAuthAutocomplete();
+    }
+  });
+}
+
