@@ -68,7 +68,13 @@
       <!-- ============ BUYER TRACKING CALLOUT ============ -->
       <div class="buyer-box">
         <div class="buyer-box-head">
-          <span>📦</span>
+          <span class="svg-ico" style="color:var(--accent);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+              <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            </svg>
+          </span>
           <span>Tracking a Fingerling Delivery?</span>
         </div>
         <p>No login needed for buyers. View live water telemetry, dissolved oxygen, and GPS vehicle tracking.</p>
@@ -161,7 +167,15 @@
         <div class="upload-box" id="permitUploadBox" onclick="document.getElementById('permitFileInput').click()">
           <input type="file" id="permitFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handlePermitUpload(event)">
           <div id="permitPlaceholder">
-            <div class="upload-ico">📄</div>
+            <div class="upload-ico">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
             <div class="upload-text">Click to upload photo of BFAR Farm Permit</div>
             <div class="upload-hint">Supported formats: JPG, PNG, WEBP (Max 5MB)</div>
           </div>
@@ -184,9 +198,18 @@
   <!-- ============ FORGOT PASSWORD MODAL ============ -->
   <div class="modal-overlay" id="forgotPassModal">
     <div class="modal-box">
-      <button class="modal-close-btn" onclick="closeForgotPassModal()">✕</button>
+      <button class="modal-close-btn" onclick="closeForgotPassModal()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
       
-      <div style="font-size:36px; margin-bottom:8px;">🔑</div>
+      <div style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:50%; background:rgba(0,180,216,0.12); color:var(--accent); margin-bottom:12px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 2l-2 2m-1.5 1.5L14 9l-1.5-1.5L11 9l-1.5-1.5L8 9l-1.5-1.5L5 9a7 7 0 1 0 9.9 0L21 2z"></path>
+        </svg>
+      </div>
       <h3 style="font-size:20px; font-weight:700; color:var(--text); margin-bottom:6px;">Reset Password</h3>
       <p style="font-size:13px; color:var(--text-soft); margin-bottom:18px;">
         Enter your registered email address. We will send a secure password reset link directly to your inbox.
@@ -194,7 +217,13 @@
 
       <div class="alert-box alert-error" id="fpError" style="margin-bottom:14px;"></div>
       <div class="alert-box alert-success" id="fpSuccessMsg" style="margin-bottom:16px;">
-        <b>✉️ Reset link sent!</b><br>
+        <div style="display:flex; align-items:center; gap:8px; font-weight:700; margin-bottom:4px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          Reset link sent!
+        </div>
         Please check your Gmail inbox and click the reset link to create your new password.
       </div>
 
@@ -207,7 +236,11 @@
         </div>
 
         <button class="btn btn-primary btn-block" id="fpSendLinkBtn" onclick="handleSendResetLink()">
-          Send Reset Link ✉️
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          Send Reset Link
         </button>
       </div>
 
@@ -222,9 +255,19 @@
   <!-- ============ EDIT / UPDATE SUBMITTED APPLICATION MODAL ============ -->
   <div class="modal-overlay" id="editAppModal">
     <div class="modal-box wide">
-      <button class="modal-close-btn" onclick="closeEditApplicationModal()">✕</button>
+      <button class="modal-close-btn" onclick="closeEditApplicationModal()" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
       
-      <div style="font-size:32px; margin-bottom:6px;">✏️</div>
+      <div style="display:inline-flex; align-items:center; justify-content:center; width:58px; height:58px; border-radius:50%; background:rgba(11,93,122,0.1); color:var(--primary); margin-bottom:10px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+        </svg>
+      </div>
       <h3 style="font-size:20px; font-weight:700; color:var(--text); margin-bottom:4px;">Edit Submitted Registration</h3>
       <p style="font-size:13px; color:var(--text-soft); margin-bottom:18px;">
         Update your farm details or upload a corrected BFAR Farm Permit photo before review.
@@ -284,7 +327,15 @@
         <div class="upload-box has-image" id="editPermitUploadBox" onclick="document.getElementById('editPermitFileInput').click()">
           <input type="file" id="editPermitFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;" onchange="handleEditPermitUpload(event)">
           <div id="editPermitPlaceholder" style="display:none;">
-            <div class="upload-ico">📄</div>
+            <div class="upload-ico">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
             <div class="upload-text">Click to upload photo of BFAR Farm Permit</div>
             <div class="upload-hint">Supported formats: JPG, PNG, WEBP (Max 5MB)</div>
           </div>

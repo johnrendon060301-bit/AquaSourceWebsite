@@ -1388,3 +1388,15 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   pointer-events: none !important;
 }
 
+.svg-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+

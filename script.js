@@ -16,6 +16,20 @@ let routePolyline = null;
 let audioContext = null;
 let toastTimer = null;
 
+// SVG Icons Dictionary for Clean Vector Rendering
+const ICONS = {
+  truck: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+  hatchery: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="10" y1="6" x2="14" y2="6"></line><line x1="10" y1="10" x2="14" y2="10"></line><line x1="10" y1="14" x2="14" y2="14"></line><line x1="10" y1="18" x2="14" y2="18"></line></svg>',
+  pin: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+  target: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>',
+  ban: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>',
+  clock: '<svg class="svg-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+  check: '<svg class="svg-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+  warning: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+  box: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>'
+};
+
+
 /* =========================================================================
    APPLICATION LIFECYCLE
    ========================================================================= */
@@ -217,9 +231,9 @@ function normalizeShipmentData(raw, code) {
       lastUpdated: new Date().toLocaleTimeString()
     },
     notifications: isCancelled ? [
-      { id: 'n1', type: 'critical', icon: '🚫', title: 'Shipment Cancelled', time: raw.cancelledAt ? new Date(raw.cancelledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently', body: `Tracking #${trackingCode} has been cancelled upon buyer request.` }
+      { id: 'n1', type: 'critical', icon: ICONS.ban, title: 'Shipment Cancelled', time: raw.cancelledAt ? new Date(raw.cancelledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recently', body: `Tracking #${trackingCode} has been cancelled upon buyer request.` }
     ] : (raw.notifications || [
-      { id: 'n1', type: 'info', icon: '🚚', title: 'Shipment En Route', time: 'Recently', body: `Tracking #${trackingCode} is en route to ${buyerName}.` }
+      { id: 'n1', type: 'info', icon: ICONS.truck, title: 'Shipment En Route', time: 'Recently', body: `Tracking #${trackingCode} is en route to ${buyerName}.` }
     ]),
     deliverySummary: {
       deliveredAt: stage === 3 ? 'Completed' : 'In Progress',
@@ -268,7 +282,7 @@ function onShipmentDataReceived(data) {
   const errText = document.getElementById('codeErrorMsg');
 
   if (data.isExpired || data.status?.stage === 3 || String(data.status?.label).toLowerCase().includes('delivered')) {
-    if (errText) errText.innerHTML = `⏳ <b>Tracking Code Expired:</b> Shipment #${data.trackingCode} has been delivered and completed. Real-time telemetry tracking is closed.`;
+    if (errText) errText.innerHTML = `${ICONS.clock} <b>Tracking Code Expired:</b> Shipment #${data.trackingCode} has been delivered and completed. Real-time telemetry tracking is closed.`;
     if (errEl) {
       errEl.className = 'code-error show expired-notice';
     }
@@ -488,7 +502,7 @@ function renderNotifications(notifs) {
     div.className = `notif-card ${isCriticalCard}`;
     div.innerHTML = `
       <div class="notif-top">
-        <div class="notif-ico ${icoClass}">${n.icon || '📍'}</div>
+        <div class="notif-ico ${icoClass}">${n.icon || ICONS.pin}</div>
         <div>
           <div class="notif-title">${n.title}</div>
           <div class="notif-time">${n.time || 'Just now'}</div>
@@ -519,7 +533,7 @@ function renderDeliveryCompleteView(data) {
   const surv = document.getElementById('compSurvival');
 
   if (title) title.textContent = 'Delivery Completed (Tracking Expired)';
-  if (expBadge) expBadge.textContent = `⏳ Tracking #${data.trackingCode} Expired`;
+  if (expBadge) expBadge.innerHTML = `${ICONS.clock} Tracking #${data.trackingCode} Expired`;
   if (sub) sub.textContent = `Tracking #${data.trackingCode} has expired following arrival at ${data.parties?.buyer || 'your farm'}. Live telemetry is closed.`;
   if (time) time.textContent = data.deliverySummary?.deliveredAt || '09:02 AM';
   if (dur) dur.textContent = data.deliverySummary?.totalDuration || '1h 52m';
@@ -639,7 +653,7 @@ function initLeafletMap() {
   // Origin Hatchery Marker (SRP Facility)
   const originIcon = L.divIcon({
     className: 'custom-map-icon',
-    html: '<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3); font-size:16px;">🏢</div>',
+    html: `<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.hatchery}</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16]
   });
@@ -649,7 +663,7 @@ function initLeafletMap() {
   // Destination Farm Marker (Carcar)
   const destIcon = L.divIcon({
     className: 'custom-map-icon',
-    html: '<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3); font-size:16px;">🎯</div>',
+    html: `<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.pin}</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16]
   });
@@ -659,7 +673,7 @@ function initLeafletMap() {
   // Live Transport Truck Marker
   const truckIcon = L.divIcon({
     className: 'custom-map-icon',
-    html: '<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5); font-size:18px;">🚚</div>',
+    html: `<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5);">${ICONS.truck}</div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18]
   });

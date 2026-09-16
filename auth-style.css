@@ -507,12 +507,34 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   right: 18px;
   background: var(--surface-tint);
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
   color: var(--text-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.modal-close-btn:hover {
+  background: #E1EFF4;
+  color: var(--primary);
+}
+
+.svg-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
 }
 
 /* ============ TOAST NOTIFICATION ============ */
@@ -539,3 +561,4 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+

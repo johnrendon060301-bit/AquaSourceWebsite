@@ -303,7 +303,7 @@ function toggleCheck(el) {
   const box = el.querySelector('.checkbox');
   if (box) {
     box.classList.toggle('checked');
-    box.textContent = box.classList.contains('checked') ? '✓' : '';
+    box.innerHTML = box.classList.contains('checked') ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '';
   }
 }
 
@@ -339,7 +339,7 @@ function toggleSidebar() {
 }
 
 /* =========================================================================
-   PERMIT VECTOR DOCUMENT ENGINE
+   VECTOR PERMIT GENERATOR (Fallback Preview)
    ========================================================================= */
 
 function buildPermitSVG(seed, large) {
@@ -417,9 +417,12 @@ function renderAll() {
   if (statRejected) statRejected.textContent = rejected.length;
   if (statTotal) statTotal.textContent = accounts.length;
 
-  const pendingHtml = pending.length ? pending.map(accountCard).join('') : emptyNote('🎉', 'No seller accounts waiting for review');
-  const approvedHtml = approved.length ? approved.map(accountCard).join('') : emptyNote('📭', 'No approved seller accounts yet');
-  const rejectedHtml = rejected.length ? rejected.map(accountCard).join('') : emptyNote('📭', 'No rejected seller accounts');
+  const emptyPending = '<svg class="svg-ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+  const emptyBox = '<svg class="svg-ico" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>';
+
+  const pendingHtml = pending.length ? pending.map(accountCard).join('') : emptyNote(emptyPending, 'No seller accounts waiting for review');
+  const approvedHtml = approved.length ? approved.map(accountCard).join('') : emptyNote(emptyBox, 'No approved seller accounts yet');
+  const rejectedHtml = rejected.length ? rejected.map(accountCard).join('') : emptyNote(emptyBox, 'No rejected seller accounts');
 
   const pendingGrid = document.getElementById('pendingGrid');
   const dashPendingGrid = document.getElementById('dashPendingGrid');
@@ -433,7 +436,7 @@ function renderAll() {
 }
 
 function emptyNote(icon, text) {
-  return `<div class="empty-note" style="grid-column:1/-1;"><div>${icon}</div><div>${text}</div></div>`;
+  return `<div class="empty-note" style="grid-column:1/-1;"><div style="display:flex; justify-content:center; margin-bottom:8px; color:var(--accent);">${icon}</div><div>${text}</div></div>`;
 }
 
 /* =========================================================================
@@ -479,11 +482,15 @@ function openReviewModal(id) {
   if (rAddress) rAddress.textContent = a.address || '—';
   if (rSubmitted) rSubmitted.textContent = a.submitted || '—';
 
-  const statusLabels = { pending: '⏳ Pending Review', approved: '✅ Approved & Verified', rejected: '⛔ Disapproved' };
+  const statusLabels = {
+    pending: '<span style="display:inline-flex; align-items:center; gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>Pending Review</span>',
+    approved: '<span style="display:inline-flex; align-items:center; gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>Approved &amp; Verified</span>',
+    rejected: '<span style="display:inline-flex; align-items:center; gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>Disapproved</span>'
+  };
   const statusColors = { pending: 'var(--warning)', approved: 'var(--success)', rejected: 'var(--critical)' };
 
   if (statusEl) {
-    statusEl.textContent = statusLabels[a.status] || a.status;
+    statusEl.innerHTML = statusLabels[a.status] || a.status;
     statusEl.style.color = statusColors[a.status] || 'var(--text)';
   }
 
@@ -532,7 +539,7 @@ function approveCurrentAccount() {
 
   closeReviewModal();
   renderAll();
-  showToast(`✅ ${farmName} approved! SMS notice sent to ${a.phone || a.email}.`);
+  showToast(`${farmName} approved! Verification notice sent to ${a.phone || a.email}.`);
 }
 
 /* =========================================================================

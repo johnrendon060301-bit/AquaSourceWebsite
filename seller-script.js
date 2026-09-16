@@ -2,6 +2,28 @@
    AQUASOURCE SELLER APPLICATION ENGINE (seller-script.js)
    ========================================================================== */
 
+const ICONS = {
+  box: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>',
+  truck: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+  check: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06A77D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+  user: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+  users: '<svg class="svg-ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+  chart: '<svg class="svg-ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>',
+  pin: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+  cancel: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>',
+  copy: '<svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+  edit: '<svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+  eye: '<svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>',
+  trash: '<svg class="svg-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>',
+  phone: '<svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
+  mail: '<svg class="svg-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
+  warning: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+  ban: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>',
+  clock: '<svg class="svg-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+  bell: '<svg class="svg-ico" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+  hatchery: '<svg class="svg-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="9" y1="22" x2="9" y2="22.01"></line><line x1="15" y1="22" x2="15" y2="22.01"></line><line x1="10" y1="6" x2="14" y2="6"></line><line x1="10" y1="10" x2="14" y2="10"></line><line x1="10" y1="14" x2="14" y2="14"></line><line x1="10" y1="18" x2="14" y2="18"></line></svg>'
+};
+
 // Application State (Clean initial state; loaded dynamically from Firebase)
 let currentUser = null;
 let sellerProfile = null;
@@ -586,7 +608,7 @@ function renderDashboardStats() {
   const dashOrdersList = document.getElementById('dashOrdersList');
   if (dashOrdersList) {
     if (orders.length === 0) {
-      dashOrdersList.innerHTML = emptyNote('📦', 'No active transport orders yet. Click "+ New Transport Order" to create one.');
+      dashOrdersList.innerHTML = emptyNote(ICONS.box, 'No active transport orders yet. Click "+ New Transport Order" to create one.');
     } else {
       dashOrdersList.innerHTML = orders.slice(0, 4).map(renderOrderCard).join('');
     }
@@ -596,16 +618,16 @@ function renderDashboardStats() {
   const dashPersonnelList = document.getElementById('dashPersonnelList');
   if (dashPersonnelList) {
     if (personnel.length === 0) {
-      dashPersonnelList.innerHTML = emptyNote('👥', 'No drivers registered yet. Click "+ Add Personnel" to register your transport team.');
+      dashPersonnelList.innerHTML = emptyNote(ICONS.users, 'No drivers registered yet. Click "+ Add Personnel" to register your transport team.');
     } else {
       dashPersonnelList.innerHTML = personnel.slice(0, 4).map(p => {
         const displayName = p.name || `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Driver';
         return `
           <div class="order-item" onclick="showView('personnel', document.querySelector('[data-view=personnel]'))">
-            <div class="order-ico">👤</div>
+            <div class="order-ico" style="display:flex; align-items:center; justify-content:center;">${ICONS.user}</div>
             <div class="order-mid">
               <div class="order-title">${escapeHtml(displayName)}</div>
-              <div class="order-sub">📞 ${escapeHtml(p.phone || '—')} · ✉️ ${escapeHtml(p.email || '—')}</div>
+              <div class="order-sub">${ICONS.phone} ${escapeHtml(p.phone || '—')} · ${ICONS.mail} ${escapeHtml(p.email || '—')}</div>
             </div>
             <span class="order-badge badge-delivered">ACTIVE</span>
           </div>
@@ -618,14 +640,15 @@ function renderDashboardStats() {
 function renderOrderCard(o) {
   const badgeClass = o.status === 'transit' ? 'badge-transit' : o.status === 'delivered' ? 'badge-delivered' : o.status === 'cancelled' ? 'badge-cancelled' : 'badge-preparing';
   const badgeLabel = o.status === 'transit' ? 'IN TRANSIT' : o.status === 'delivered' ? 'DELIVERED' : o.status === 'cancelled' ? 'CANCELLED' : 'PREPARING';
+  const icoHtml = o.status === 'delivered' ? ICONS.check : (o.status === 'transit' ? ICONS.truck : ICONS.box);
 
   return `
     <div class="order-item" onclick="openOrderDetail('${o.id}')">
-      <div class="order-ico">${o.status === 'delivered' ? '✅' : o.status === 'transit' ? '🚚' : '📦'}</div>
+      <div class="order-ico" style="display:flex; align-items:center; justify-content:center;">${icoHtml}</div>
       <div class="order-mid">
         <div class="order-title">
           <span class="mono" style="font-weight:700;">#${o.code || 'AQS-0000'}</span>
-          <button class="btn-copy-code" title="Copy tracking code" onclick="event.stopPropagation(); copyTrackingCode('${o.code}')">📋</button>
+          <button class="btn-copy-code" title="Copy tracking code" onclick="event.stopPropagation(); copyTrackingCode('${o.code}')">${ICONS.copy}</button>
           · ${escapeHtml(o.buyer || 'Buyer')}
         </div>
         <div class="order-sub">${escapeHtml(o.personnel || 'Unassigned')} · ${o.quantity || 0} pcs ${escapeHtml(o.species || 'Fingerlings')}</div>
@@ -644,7 +667,7 @@ function renderOrdersView() {
   if (!grid) return;
 
   if (orders.length === 0) {
-    grid.innerHTML = `<tr><td colspan="7">${emptyNote('📦', 'No transport orders recorded. Click "+ New Transport Order" to create your first shipment.')}</td></tr>`;
+    grid.innerHTML = `<tr><td colspan="7">${emptyNote(ICONS.box, 'No transport orders recorded. Click "+ New Transport Order" to create your first shipment.')}</td></tr>`;
     return;
   }
 
@@ -656,18 +679,18 @@ function renderOrdersView() {
       <tr onclick="openOrderDetail('${o.id}')">
         <td>
           <b class="mono">#${o.code || 'AQS-0000'}</b>
-          <button class="btn-copy-code" title="Copy tracking code to share with buyer" onclick="event.stopPropagation(); copyTrackingCode('${o.code}')">📋</button>
+          <button class="btn-copy-code" title="Copy tracking code to share with buyer" onclick="event.stopPropagation(); copyTrackingCode('${o.code}')">${ICONS.copy}</button>
         </td>
         <td><b>${escapeHtml(o.buyer || '—')}</b><br><small class="faint">${escapeHtml(o.dest || '—')}</small></td>
         <td>${escapeHtml(o.personnel || '—')}</td>
-        <td><span class="mono">${(o.unit && o.unit !== 'undefined' && o.unit.trim() !== '') ? o.unit : (o.status === 'cancelled' ? '—' : '📡 Pending Mobile Link')}</span></td>
+        <td><span class="mono">${(o.unit && o.unit !== 'undefined' && o.unit.trim() !== '') ? o.unit : (o.status === 'cancelled' ? '—' : 'Pending Mobile Link')}</span></td>
         <td>${Number(o.quantity || 0).toLocaleString()} pcs</td>
         <td><span class="order-badge ${badgeClass}">${badgeLabel}</span></td>
         <td>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openEditOrderModal('${o.id}')">✏️ Edit</button>
-            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openOrderDetail('${o.id}')">Monitor 👁️</button>
-            ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button class="btn btn-sm btn-outline" style="color:var(--critical); border-color:var(--critical);" onclick="event.stopPropagation(); cancelOrder('${o.id}', '${escapeHtml(o.code || '')}')">🚫 Cancel</button>` : ''}
+            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openEditOrderModal('${o.id}')">${ICONS.edit} Edit</button>
+            <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); openOrderDetail('${o.id}')">${ICONS.eye} Monitor</button>
+            ${o.status !== 'cancelled' && o.status !== 'delivered' ? `<button class="btn btn-sm btn-outline" style="color:var(--critical); border-color:var(--critical);" onclick="event.stopPropagation(); cancelOrder('${o.id}', '${escapeHtml(o.code || '')}')">${ICONS.cancel} Cancel</button>` : ''}
           </div>
         </td>
       </tr>
@@ -846,7 +869,7 @@ function openNewOrderModal() {
     } else {
       opts.innerHTML = activeStaff.map(p => {
         const displayName = p.name || `${p.firstName || ''} ${p.lastName || ''}`.trim() || 'Transport Personnel';
-        const phone = p.phone ? ` · 📞 ${escapeHtml(p.phone)}` : '';
+        const phone = p.phone ? ` · ${ICONS.phone} ${escapeHtml(p.phone)}` : '';
         return `
           <div class="select-opt" onclick="pickPersonnel('${escapeHtml(displayName)}', '${p.id}')">
             ${escapeHtml(displayName)}<small>Transport Personnel${phone}</small>
@@ -1127,7 +1150,7 @@ function initOrUpdateSellerMap(order) {
     // Origin Hatchery Marker (SRP Facility)
     const originIcon = L.divIcon({
       className: 'custom-map-icon',
-      html: '<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3); font-size:16px;">🏢</div>',
+      html: '<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg></div>',
       iconSize: [32, 32],
       iconAnchor: [16, 16]
     });
@@ -1137,7 +1160,7 @@ function initOrUpdateSellerMap(order) {
     // Destination Farm Marker (Carcar)
     const destIcon = L.divIcon({
       className: 'custom-map-icon',
-      html: '<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3); font-size:16px;">🎯</div>',
+      html: '<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>',
       iconSize: [32, 32],
       iconAnchor: [16, 16]
     });
@@ -1147,7 +1170,7 @@ function initOrUpdateSellerMap(order) {
     // Live Transport Truck Marker (Positioned along road)
     const truckIcon = L.divIcon({
       className: 'custom-map-icon',
-      html: '<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5); font-size:18px;">🚚</div>',
+      html: '<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div>',
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
@@ -1215,7 +1238,7 @@ function updateMonitoringModalState() {
   const dtUnit = document.getElementById('dtUnit');
 
   if (titleSub) titleSub.textContent = `Tracking #${o.code || 'AQS-0000'}`;
-  if (dtCode) dtCode.innerHTML = `${o.code || '—'} <button class="btn-copy-code" title="Copy tracking code" onclick="copyTrackingCode('${o.code}')">📋 Copy</button>`;
+  if (dtCode) dtCode.innerHTML = `${o.code || '—'} <button class="btn-copy-code" title="Copy tracking code" onclick="copyTrackingCode('${o.code}')">${ICONS.copy} Copy</button>`;
   if (dtBuyer) dtBuyer.textContent = o.buyer || '—';
   if (dtQty) dtQty.textContent = `${Number(o.quantity || 0).toLocaleString()} pcs (${o.species || 'Tilapia'})`;
   if (dtUnit) dtUnit.textContent = (o.unit && o.unit !== 'undefined' && o.unit.trim() !== '') ? o.unit : (o.status === 'cancelled' ? '—' : 'Pending Mobile Connection');
@@ -1242,10 +1265,10 @@ function updateMonitoringModalState() {
     }
     if (bannerTitle) bannerTitle.textContent = 'Shipment Cancelled';
     if (bannerSub) bannerSub.textContent = `Tracking #${o.code} was cancelled upon buyer request.`;
-    if (bannerIco) bannerIco.textContent = '🚫';
+    if (bannerIco) bannerIco.innerHTML = ICONS.cancel;
 
     if (aiText) aiText.textContent = 'Live telemetry tracking ended because this shipment was cancelled.';
-    if (aiRecs) aiRecs.innerHTML = '<div class="ai-rec"><span>🚫</span><span>No active transport telemetry.</span></div>';
+    if (aiRecs) aiRecs.innerHTML = `<div class="ai-rec"><span style="display:flex; align-items:center;">${ICONS.cancel}</span><span>No active transport telemetry.</span></div>`;
     if (aiStress) {
       aiStress.textContent = '—';
       aiStress.className = 'ai-stat-value';
@@ -1264,7 +1287,7 @@ function updateMonitoringModalState() {
     }
     if (bannerTitle) bannerTitle.textContent = 'In Transit';
     if (bannerSub) bannerSub.textContent = `Tracking #${o.code} · ${o.personnel} → ${o.buyer}`;
-    if (bannerIco) bannerIco.textContent = '🚚';
+    if (bannerIco) bannerIco.innerHTML = ICONS.truck;
 
     if (aiText) aiText.textContent = 'All water parameters are within optimal biological limits for tilapia transport.';
     if (aiRecs) aiRecs.innerHTML = '<div class="ai-rec"><span>▸</span><span>Maintain current aeration rate and transport speed.</span></div>';
@@ -1286,7 +1309,7 @@ function updateMonitoringModalState() {
     }
     if (bannerTitle) bannerTitle.textContent = 'Near Destination';
     if (bannerSub) bannerSub.textContent = `Tracking #${o.code} is approaching ${o.buyer}`;
-    if (bannerIco) bannerIco.textContent = '📍';
+    if (bannerIco) bannerIco.innerHTML = ICONS.pin;
 
     if (aiText) aiText.textContent = 'Approaching receiving destination. Prepare receiving acclimatization tanks.';
     if (aiRecs) aiRecs.innerHTML = '<div class="ai-rec"><span>▸</span><span>Prepare receiving acclimatization tanks.</span></div>';
@@ -1308,10 +1331,10 @@ function updateMonitoringModalState() {
     }
     if (bannerTitle) bannerTitle.textContent = 'Delivered & Completed';
     if (bannerSub) bannerSub.textContent = `Tracking #${o.code} has arrived safely at ${o.buyer}`;
-    if (bannerIco) bannerIco.textContent = '✅';
+    if (bannerIco) bannerIco.innerHTML = ICONS.check;
 
     if (aiText) aiText.textContent = 'Delivery completed successfully with optimal fingerling survival rate.';
-    if (aiRecs) aiRecs.innerHTML = '<div class="ai-rec"><span>✓</span><span>Acclimatization process initiated.</span></div>';
+    if (aiRecs) aiRecs.innerHTML = `<div class="ai-rec"><span style="display:inline-flex; align-items:center;">${ICONS.check}</span><span>Acclimatization process initiated.</span></div>`;
     if (aiStress) {
       aiStress.textContent = 'Safe';
       aiStress.className = 'ai-stat-value stress-low';
@@ -1402,7 +1425,7 @@ function renderPersonnelView() {
   const activeStaff = personnel.filter(p => p.status === 'active' || p.status === 'approved' || !p.status);
 
   if (activeStaff.length === 0) {
-    activeGrid.innerHTML = emptyNote('👥', 'No transport personnel registered yet. Click "+ Add Personnel" to register your drivers.');
+    activeGrid.innerHTML = emptyNote(ICONS.users, 'No transport personnel registered yet. Click "+ Add Personnel" to register your drivers.');
     return;
   }
 
@@ -1412,8 +1435,8 @@ function renderPersonnelView() {
 
     const hasUnit = p.unit && String(p.unit).trim() !== '' && p.unit !== 'undefined' && p.unit !== 'AQS-001';
     const unitChip = hasUnit
-      ? `<span class="device-chip" style="background:#E1F7EF; color:#06A77D; border:1px solid #A3E9D2;">🔗 Unit ${escapeHtml(p.unit)}</span>`
-      : `<span class="device-chip" style="background:#F2F8FB; color:#5B7A85; border:1px dashed #CBDDE4;">📡 No Unit Paired (Scan to link)</span>`;
+      ? `<span class="device-chip" style="background:#E1F7EF; color:#06A77D; border:1px solid #A3E9D2;">Unit ${escapeHtml(p.unit)}</span>`
+      : `<span class="device-chip" style="background:#F2F8FB; color:#5B7A85; border:1px dashed #CBDDE4;">No Unit Paired (Scan to link)</span>`;
 
     return `
       <div class="personnel-card">
@@ -1421,13 +1444,13 @@ function renderPersonnelView() {
           <div class="personnel-avatar">${(displayName.charAt(0) || 'D').toUpperCase()}</div>
           <div style="flex:1;">
             <div class="personnel-name">${escapeHtml(displayName)}</div>
-            <div class="personnel-sub">📞 ${escapeHtml(phoneNum)} · ✉️ ${escapeHtml(p.email || '—')}</div>
+            <div class="personnel-sub">${ICONS.phone} ${escapeHtml(phoneNum)} · ${ICONS.mail} ${escapeHtml(p.email || '—')}</div>
           </div>
-          <button class="btn btn-sm btn-outline" style="color:var(--critical); border-color:var(--critical); padding:6px 10px;" title="Remove driver" onclick="deleteDriver('${p.id}', '${escapeHtml(displayName)}')">🗑️</button>
+          <button class="btn btn-sm btn-outline" style="color:var(--critical); border-color:var(--critical); padding:6px 10px;" title="Remove driver" onclick="deleteDriver('${p.id}', '${escapeHtml(displayName)}')">${ICONS.trash}</button>
         </div>
         <div class="personnel-devices">
           ${unitChip}
-          <span class="device-chip">📱 Driver Account Active</span>
+          <span class="device-chip">Driver Account Active</span>
         </div>
       </div>
     `;
@@ -1607,7 +1630,7 @@ function renderTelemetryView() {
   if (!list) return;
 
   if (telemetry.length === 0) {
-    list.innerHTML = emptyNote('📈', 'No sensor telemetry recorded yet. Live data from active shipments will log here.');
+    list.innerHTML = emptyNote(ICONS.chart, 'No sensor telemetry recorded yet. Live data from active shipments will log here.');
     return;
   }
 
@@ -1680,7 +1703,7 @@ function renderNotificationsView() {
   if (!list) return;
 
   if (notifications.length === 0) {
-    list.innerHTML = emptyNote('🔔', 'No notifications. Real-time delivery and alert updates will appear here.');
+    list.innerHTML = emptyNote(ICONS.bell, 'No notifications. Real-time delivery and alert updates will appear here.');
     if (notifDot) notifDot.style.display = 'none';
     return;
   }
@@ -1690,7 +1713,7 @@ function renderNotificationsView() {
 
   list.innerHTML = notifications.map(n => {
     const icoClass = n.type === 'critical' ? 'ico-critical' : n.type === 'success' ? 'ico-success' : 'ico-info';
-    const icoSymbol = n.type === 'critical' ? '⚠️' : n.type === 'success' ? '✅' : '📦';
+    const icoSymbol = n.type === 'critical' ? ICONS.warning : n.type === 'success' ? ICONS.check : ICONS.box;
     const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
 
     return `
@@ -1736,11 +1759,11 @@ function renderProfileView() {
 
   if (pStatusEl) {
     if (profStatus === 'approved') {
-      pStatusEl.innerHTML = '<span style="color:var(--success); font-weight:700;">✅ Approved & Verified</span>';
+      pStatusEl.innerHTML = `<span style="color:var(--success); font-weight:700; display:inline-flex; align-items:center; gap:5px;">${ICONS.check} Approved &amp; Verified</span>`;
     } else if (profStatus === 'rejected') {
-      pStatusEl.innerHTML = '<span style="color:var(--critical); font-weight:700;">⛔ Disapproved</span>';
+      pStatusEl.innerHTML = `<span style="color:var(--critical); font-weight:700; display:inline-flex; align-items:center; gap:5px;">${ICONS.ban} Disapproved</span>`;
     } else {
-      pStatusEl.innerHTML = '<span style="color:var(--warning); font-weight:700;">⏳ Pending BFAR Review</span>';
+      pStatusEl.innerHTML = `<span style="color:var(--warning); font-weight:700; display:inline-flex; align-items:center; gap:5px;">${ICONS.clock} Pending BFAR Review</span>`;
     }
   }
 }
@@ -1837,7 +1860,10 @@ function showToast(msg) {
 }
 
 function emptyNote(icon, text) {
-  return `<div class="empty-note"><div>${icon}</div><div>${text}</div></div>`;
+  const iconHtml = (typeof icon === 'string' && (icon.includes('<svg') || icon.includes('<div')))
+    ? icon
+    : (ICONS[icon] || (icon === '📦' ? ICONS.box : (icon === '👥' ? ICONS.users : (icon === '📈' ? ICONS.chart : icon))));
+  return `<div class="empty-note"><div style="display:flex; justify-content:center; margin-bottom:8px; color:var(--accent);">${iconHtml}</div><div>${text}</div></div>`;
 }
 
 function escapeHtml(str) {
@@ -1908,7 +1934,14 @@ function buildMapSVG() {
     <g class="compassring"><circle cx="30" cy="28" r="16" stroke-width="1.5"/></g>
     <text class="compasstext" x="30" y="24" font-size="9" text-anchor="middle">N</text>
     <polygon class="compasstext" points="30,14 27,22 33,22"/>
-    <g><circle class="truckbody" cx="0" cy="0" r="13" stroke-width="2.5"/><text x="0" y="4" font-size="13" text-anchor="middle">🚚</text>
+    <g>
+      <circle class="truckbody" cx="0" cy="0" r="13" stroke-width="2.5"/>
+      <g transform="translate(-7, -7) scale(0.6)">
+        <rect x="1" y="3" width="15" height="13" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="5.5" cy="18.5" r="2.5" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+        <circle cx="18.5" cy="18.5" r="2.5" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+      </g>
       <animateMotion dur="9s" repeatCount="indefinite" keyPoints="0;1;0" keyTimes="0;0.5;1" calcMode="linear" path="${routeD}"/>
     </g>
   </svg>`;

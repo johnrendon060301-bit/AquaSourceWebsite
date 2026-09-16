@@ -71,7 +71,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     if (rememberBox) {
       rememberBox.classList.add('checked');
-      rememberBox.textContent = '✓';
+      rememberBox.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
     }
   }
 });
@@ -203,10 +203,14 @@ async function handleLoginSubmit() {
         await fbAuth.signOut();
         showAlert(errEl, `
           <div style="text-align:left; line-height:1.4;">
-            <div style="font-size:14px; font-weight:700; margin-bottom:4px;">⏳ Application Under Review</div>
+            <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; margin-bottom:4px; color:#b45309;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Application Under Review
+            </div>
             <div style="font-size:12px; opacity:0.95; margin-bottom:8px;">Your farm registration is currently under review by BFAR Administrators. Need to correct your information or permit image?</div>
             <button type="button" class="btn btn-outline btn-sm" style="background:#fff; color:var(--primary); border-color:var(--primary); width:100%; font-weight:700;" onclick="openEditApplicationModal()">
-              ✏️ Edit Submitted Details / Change Permit
+              <svg class="svg-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Edit Submitted Details / Change Permit
             </button>
           </div>
         `);
@@ -218,10 +222,14 @@ async function handleLoginSubmit() {
         const reasonText = sellerDoc.reason ? `<br><b>BFAR Reason:</b> ${sellerDoc.reason}` : '';
         showAlert(errEl, `
           <div style="text-align:left; line-height:1.4;">
-            <div style="font-size:14px; font-weight:700; margin-bottom:4px;">⛔ Registration Requires Update</div>
+            <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; margin-bottom:4px; color:#dc2626;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+              Registration Requires Update
+            </div>
             <div style="font-size:12px; margin-bottom:8px;">Your farm owner registration was disapproved.${reasonText}</div>
             <button type="button" class="btn btn-primary btn-sm" style="width:100%; font-weight:700;" onclick="openEditApplicationModal()">
-              ✏️ Update Permit & Re-Submit Application
+              <svg class="svg-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Update Permit &amp; Re-Submit Application
             </button>
           </div>
         `);
@@ -574,10 +582,14 @@ async function handleSignupSubmit() {
     if (loginSuccess) {
       loginSuccess.innerHTML = `
         <div style="text-align:left; line-height:1.4;">
-          <div style="font-size:14px; font-weight:700; margin-bottom:4px;">✅ Registration Submitted!</div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; margin-bottom:4px; color:#06A77D;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Registration Submitted!
+          </div>
           <div style="font-size:12px; margin-bottom:8px;">Your BFAR permit is now under review by BFAR Administrators. Need to correct details or replace the permit photo?</div>
           <button type="button" class="btn btn-outline btn-sm" style="background:#fff; color:#06A77D; border-color:#06A77D; width:100%; font-weight:700;" onclick="openEditApplicationModal()">
-            ✏️ Review &amp; Edit Submitted Details
+            <svg class="svg-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            Review &amp; Edit Submitted Details
           </button>
         </div>
       `;
@@ -676,7 +688,7 @@ async function handleSendResetLink() {
   } finally {
     if (btn) {
       btn.disabled = false;
-      btn.textContent = 'Send Reset Link ✉️';
+      btn.innerHTML = 'Send Reset Link <svg class="svg-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-left:4px;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>';
     }
   }
 }
@@ -747,7 +759,7 @@ function toggleCheck(el) {
   const box = el.querySelector('.checkbox') || el;
   if (box) {
     const isChecked = box.classList.toggle('checked');
-    box.textContent = isChecked ? '✓' : '';
+    box.innerHTML = isChecked ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>' : '';
     if (!isChecked && (box.id === 'rememberBox' || el.id === 'rememberBox')) {
       localStorage.removeItem('aquasource_remember_session');
       localStorage.removeItem('aquasource_remember_email');
@@ -974,10 +986,14 @@ async function handleSaveApplicationEdit() {
     if (errElLogin) {
       showAlert(errElLogin, `
         <div style="text-align:left; line-height:1.4;">
-          <div style="font-size:14px; font-weight:700; color:#06A77D; margin-bottom:4px;">✅ Updated &amp; Resubmitted!</div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; color:#06A77D; margin-bottom:4px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Updated &amp; Resubmitted!
+          </div>
           <div style="font-size:12px; margin-bottom:8px;">Your revised farm details and permit photo have been saved and are ready for BFAR Admin verification.</div>
           <button type="button" class="btn btn-outline btn-sm" style="background:#fff; color:var(--primary); border-color:var(--primary); width:100%; font-weight:700;" onclick="openEditApplicationModal()">
-            ✏️ Edit Details Again
+            <svg class="svg-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            Edit Details Again
           </button>
         </div>
       `);

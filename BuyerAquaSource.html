@@ -51,7 +51,10 @@
   <section class="hero" id="track">
     <div class="container hero-grid">
       <div>
-        <div class="eyebrow">⚡ Real-time Telemetry & GPS Tracking</div>
+        <div class="eyebrow">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Real-time Telemetry &amp; GPS Tracking
+        </div>
         <h1>Track your fingerling <span>shipment live.</span></h1>
         <p class="lead">Monitor live water temperature, dissolved oxygen, pH level, and GPS arrival time directly from the transport monitoring unit.</p>
         
@@ -79,7 +82,9 @@
         </div>
         
         <div class="code-error" id="codeError">
-          <span>⚠️</span>
+          <span style="display:inline-flex; align-items:center;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </span>
           <span id="codeErrorMsg">Invalid tracking code. Please check with your seller and try again.</span>
         </div>
         
@@ -148,7 +153,10 @@
 
           <div class="map-card">
             <div class="map-toolbar">
-              <div class="map-toolbar-title">📍 Live Vehicle Telemetry (Google Maps GPS)</div>
+              <div class="map-toolbar-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Live Vehicle Telemetry (GPS Tracking)
+              </div>
             </div>
             <div class="map-container-wrap">
               <div id="leafletMap" style="height:340px; width:100%; border-radius:14px;"></div>
@@ -172,7 +180,10 @@
           </div>
 
           <div class="section-label">Live Water Quality (Read-Only Telemetry)</div>
-          <div class="wq-readonly-note">🔒 Live telemetry stream from AquaSource IoT Transport Tank Sensor Probe</div>
+          <div class="wq-readonly-note">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            Live telemetry stream from AquaSource IoT Transport Tank Sensor Probe
+          </div>
           <div class="wq-grid">
             <div class="wq-card" id="wqCardTurb">
               <div class="wq-top"><span class="wq-label">Turbidity</span><div class="wq-dot dot-green" id="wqDotTurb"></div></div>
@@ -211,11 +222,17 @@
 
             <div style="background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px;">
               <div class="detail-row2" style="padding:5px 0;">
-                <span style="font-weight:600; color:var(--text-soft);">📞 Contact Phone:</span>
+                <span style="display:inline-flex; align-items:center; gap:6px; font-weight:600; color:var(--text-soft);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  Contact Phone:
+                </span>
                 <b id="detailDriverPhone" style="font-size:14px; color:var(--primary);">0917 555 0101</b>
               </div>
               <div class="detail-row2" style="padding:5px 0;">
-                <span style="font-weight:600; color:var(--text-soft);">🛡️ Transport Status:</span>
+                <span style="display:inline-flex; align-items:center; gap:6px; font-weight:600; color:var(--text-soft);">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                  Transport Status:
+                </span>
                 <b id="driverStatusText" style="color:var(--success); font-size:13px;">Assigned &amp; Active</b>
               </div>
             </div>
@@ -246,9 +263,16 @@
   <!-- ============ DELIVERY COMPLETE ============ -->
   <section id="complete">
     <div class="container complete-wrap">
-      <div class="complete-check">✓</div>
+      <div class="complete-check">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
       <div class="complete-title" id="completeTitle">Delivery Completed Successfully</div>
-      <div style="margin-bottom:12px;"><span class="status-pill" id="completeExpiredBadge" style="background:#FFF3CD; color:#856404; border:1px solid #FFEEBA; padding:4px 12px; font-size:11.5px; font-weight:700;">⏳ Tracking Code Expired</span></div>
+      <div style="margin-bottom:12px;">
+        <span class="status-pill" id="completeExpiredBadge" style="background:#FFF3CD; color:#856404; border:1px solid #FFEEBA; padding:4px 12px; font-size:11.5px; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Tracking Code Expired
+        </span>
+      </div>
       <div class="complete-sub" id="completeBatchSub">Batch #AQS-7X29K has arrived safely at Green Water Farms.</div>
       <div class="complete-time" id="completeTime">09:02 AM</div>
       <div class="complete-time-label">Official Delivery Timestamp</div>
@@ -269,7 +293,10 @@
       </div>
 
       <div class="complete-btns">
-        <button class="btn btn-primary" onclick="downloadDeliveryReport()">⬇ Download Delivery Certificate</button>
+        <button class="btn btn-primary" onclick="downloadDeliveryReport()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          Download Delivery Certificate
+        </button>
         <button class="btn btn-outline" onclick="resetTracking()">Track Another Shipment</button>
       </div>
     </div>
@@ -278,7 +305,9 @@
   <!-- ============ CRITICAL ALERT MODAL ============ -->
   <div class="modal-overlay" id="criticalModal">
     <div class="alert-modal">
-      <div class="alert-ico">⚠️</div>
+      <div class="alert-ico">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--critical)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
       <div class="alert-title">Water Quality Critical Alert</div>
       <div class="alert-text" id="alertModalText">Dissolved oxygen dropped to <b>3.1 mg/L</b> inside the transport tank for Batch #AQS-7X29K.</div>
       <div class="alert-text">The transport driver has been alerted and the automated tank aeration backup system has been triggered.</div>
