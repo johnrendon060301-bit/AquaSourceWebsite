@@ -411,9 +411,9 @@ function renderAppUI(data) {
   // 9. Dispatch Notifications
   renderNotifications(data.notifications || []);
 
-  // 10. Live Map Marker Position Update
-  if (!isCancelled && data.location && data.location.lat && data.location.lng) {
-    updateMapPosition(data.location.lat, data.location.lng, stage, data.transport?.driver, data.status?.progressPercent);
+  // 10. Live Map Marker & Dynamic Route Update (Seller Origin -> Buyer Destination)
+  if (!isCancelled) {
+    initOrUpdateBuyerMap(data);
   }
 
   // 11. Toggle Dashboard vs Delivery Completed View
@@ -555,89 +555,238 @@ function renderDeliveryCompleteView(data) {
   }
 }
 
-// High-precision road waypoints following Cebu South Coastal Road (CSCR) & N. Bacalso National Highway
-const ROAD_ROUTE_COORDS = [
-  [10.2934, 123.8805], // SRP Hatchery Facility
-  [10.2885, 123.8762], // SRP Highway Start
-  [10.2820, 123.8710], // CSCR Viaduct North
-  [10.2740, 123.8645], // CSCR Mid Viaduct
-  [10.2660, 123.8570], // CSCR South Viaduct
-  [10.2580, 123.8495], // Talisay Coastal Bridge
-  [10.2515, 123.8415], // Laray Coastal Curve
-  [10.2472, 123.8320], // San Roque Talisay
-  [10.2450, 123.8210], // Tangke, Talisay
-  [10.2442, 123.8115], // Pooc junction
-  [10.2435, 123.8030], // Lawaan I, N. Bacalso merge
-  [10.2428, 123.7940], // Lawaan II, Talisay
-  [10.2415, 123.7850], // Linao border
-  [10.2420, 123.7760], // Tungkil Minglanilla
-  [10.2410, 123.7670], // Calajo-an Minglanilla
-  [10.2390, 123.7595], // Minglanilla Poblacion
-  [10.2355, 123.7530], // Lipata
-  [10.2310, 123.7480], // Tungkop curve
-  [10.2250, 123.7445], // Inayagan, Naga border
-  [10.2180, 123.7420], // Tinaan Naga
-  [10.2100, 123.7405], // City of Naga Boardwalk
-  [10.2015, 123.7410], // Colon Naga
-  [10.1920, 123.7425], // Pangdan Naga
-  [10.1825, 123.7435], // Langtad Naga
-  [10.1740, 123.7410], // South Naga highway
-  [10.1650, 123.7360], // North San Fernando
-  [10.1550, 123.7280], // San Isidro, San Fernando
-  [10.1470, 123.7210], // South San Fernando
-  [10.1380, 123.7130], // Sangat San Fernando
-  [10.1290, 123.7040], // Perrelos border, Carcar
-  [10.1220, 123.6930], // North Carcar highway
-  [10.1160, 123.6810], // Tuyom Carcar
-  [10.1110, 123.6680], // Carcar City Rotunda Approach
-  [10.1080, 123.6550], // Carcar Poblacion
-  [10.1060, 123.6420]  // Carcar Aquaculture Receiving Farm
-];
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-let currentRoadPath = [...ROAD_ROUTE_COORDS];
+/* =========================================================================
+   DYNAMIC GEOCODING & ROUTING ENGINE
+   ========================================================================= */
+
+const KNOWN_PLACE_COORDINATES = {
+  'carcar': [10.1060, 123.6420],
+  'carcar city': [10.1060, 123.6420],
+  'carcar fish pond': [10.1085, 123.6480],
+  'carcar rotunda': [10.1110, 123.6680],
+  'valladolid': [10.1230, 123.6750],
+  'tuyom': [10.1160, 123.6810],
+  'liburon': [10.1020, 123.6350],
+  'poblacion i': [10.1070, 123.6440],
+  'poblacion ii': [10.1090, 123.6460],
+  'poblacion iii': [10.1110, 123.6490],
+  'bolinawan': [10.1250, 123.6620],
+  'ocana': [10.0820, 123.6210],
+  'ocaña': [10.0820, 123.6210],
+  'guadalupe': [10.1380, 123.6150],
+  'can-asujan': [10.1450, 123.6000],
+  'perrelos': [10.1290, 123.7040],
+  'naga': [10.2070, 123.7570],
+  'naga city': [10.2070, 123.7570],
+  'colon': [10.2015, 123.7410],
+  'tinaan': [10.2180, 123.7420],
+  'inoburan': [10.1900, 123.7450],
+  'san fernando': [10.1550, 123.7280],
+  'minglanilla': [10.2440, 123.7970],
+  'poblacion ward 1': [10.2440, 123.7970],
+  'talisay': [10.2550, 123.8400],
+  'talisay city': [10.2550, 123.8400],
+  'srp': [10.2750, 123.8650],
+  'south road properties': [10.2750, 123.8650],
+  'cebu': [10.3157, 123.8854],
+  'cebu city': [10.3157, 123.8854],
+  'mandaue': [10.3400, 123.9400],
+  'mandaue city': [10.3400, 123.9400],
+  'lapu-lapu': [10.3150, 123.9500],
+  'lapu-lapu city': [10.3150, 123.9500],
+  'liloan': [10.3950, 123.9980],
+  'consolacion': [10.3700, 123.9550],
+  'compostela': [10.4550, 124.0150],
+  'danao': [10.5200, 124.0300],
+  'danao city': [10.5200, 124.0300],
+  'carmen': [10.5800, 124.0200],
+  'catmon': [10.6800, 124.0100],
+  'sogod': [10.7500, 124.0000],
+  'borbon': [10.8300, 124.0200],
+  'tabogon': [10.9300, 124.0300],
+  'bogo': [11.0500, 124.0050],
+  'bogo city': [11.0500, 124.0050],
+  'san remigio': [10.9900, 123.9300],
+  'medellin': [11.1300, 123.9600],
+  'daanbantayan': [11.2550, 124.0200],
+  'bantayan': [11.1700, 123.7200],
+  'santa fe': [11.1550, 123.8050],
+  'madridejos': [11.2600, 123.7300],
+  'toledo': [10.3750, 123.6400],
+  'toledo city': [10.3750, 123.6400],
+  'bato': [10.3600, 123.6300],
+  'balamban': [10.5000, 123.7150],
+  'asturias': [10.5650, 123.7550],
+  'tuburan': [10.7300, 123.8250],
+  'tabuelan': [10.9000, 123.8750],
+  'pinamungajan': [10.2700, 123.5850],
+  'aloguinsan': [10.2250, 123.5500],
+  'barili': [10.1450, 123.5300],
+  'japitan': [10.1550, 123.5100],
+  'dumanjug': [10.0550, 123.4900],
+  'ronda': [9.9950, 123.4450],
+  'alcantara': [9.9750, 123.4150],
+  'moalboal': [9.9550, 123.4000],
+  'badian': [9.8650, 123.3950],
+  'alegria': [9.7600, 123.3600],
+  'malabuyoc': [9.6600, 123.3150],
+  'ginatilan': [9.5700, 123.3250],
+  'samboan': [9.5250, 123.3050],
+  'santander': [9.4200, 123.3400],
+  'oslob': [9.5200, 123.4300],
+  'boljoon': [9.6450, 123.4800],
+  'alcoy': [9.7150, 123.5100],
+  'dalaguete': [9.7600, 123.5350],
+  'argao': [9.8800, 123.6000],
+  'sibonga': [10.0150, 123.6200],
+  'cordova': [10.2500, 123.9500],
+  'tagbilaran': [9.6500, 123.8500],
+  'tagbilaran city': [9.6500, 123.8500],
+  'panglao': [9.5800, 123.7700],
+  'calape': [9.8900, 123.8700],
+  'tubigon': [9.9500, 123.9600],
+  'ubay': [10.0500, 124.4700],
+  'talibon': [10.1500, 124.3300],
+  'dumaguete': [9.3100, 123.3000],
+  'dumaguete city': [9.3100, 123.3000],
+  'bais': [9.5900, 123.1200],
+  'bais city': [9.5900, 123.1200],
+  'tanjay': [9.5100, 123.1500],
+  'tanjay city': [9.5100, 123.1500],
+  'bacolod': [10.6700, 122.9500],
+  'bacolod city': [10.6700, 122.9500],
+  'iloilo': [10.7200, 122.5600],
+  'iloilo city': [10.7200, 122.5600],
+  'roxas': [11.5850, 122.7500],
+  'roxas city': [11.5850, 122.7500],
+  'kalibo': [11.7100, 122.3650],
+  'tacloban': [11.2400, 125.0000],
+  'tacloban city': [11.2400, 125.0000],
+  'ormoc': [11.0050, 124.6100],
+  'ormoc city': [11.0050, 124.6100],
+  'manila': [14.5995, 120.9842],
+  'quezon city': [14.6760, 121.0437],
+  'makati': [14.5547, 121.0244],
+  'pasig': [14.5764, 121.0851],
+  'taguig': [14.5176, 121.0509],
+  'davao': [7.1907, 125.4553],
+  'davao city': [7.1907, 125.4553],
+  'cagayan de oro': [8.4542, 124.6319],
+  'general santos': [6.1164, 125.1716],
+  'zamboanga': [6.9214, 122.0790],
+  'zamboanga city': [6.9214, 122.0790],
+  'angeles': [15.1450, 120.5900],
+  'angeles city': [15.1450, 120.5900],
+  'baguio': [16.4023, 120.5960],
+  'baguio city': [16.4023, 120.5960],
+  'dagupan': [16.0430, 120.3330],
+  'dagupan city': [16.0430, 120.3330]
+};
+
+async function resolveLocationCoordinates(addressText, fallbackDefault = [10.3157, 123.8854]) {
+  if (!addressText || typeof addressText !== 'string' || addressText.trim() === '') {
+    return fallbackDefault;
+  }
+  const clean = addressText.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay/gi, ' ').replace(/[^\w\s]/g, ' ').trim();
+  const rawClean = addressText.toLowerCase().trim();
+
+  // 1. Direct match on key in local dictionary
+  for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
+    if (rawClean === key || rawClean.startsWith(key + ',') || rawClean.includes(key)) {
+      return coords;
+    }
+  }
+
+  // 2. Tokenized matching
+  const tokens = clean.split(/\s+/).filter(t => t.length > 2);
+  for (const t of tokens) {
+    for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
+      if (key === t || key.includes(t)) {
+        return coords;
+      }
+    }
+  }
+
+  // 3. Photon Geocoding fallback if online
+  if (navigator.onLine) {
+    try {
+      const resp = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(addressText)}&limit=1&lat=10.3157&lon=123.8854`);
+      if (resp.ok) {
+        const json = await resp.json();
+        if (json && json.features && json.features[0] && json.features[0].geometry) {
+          const [lon, lat] = json.features[0].geometry.coordinates;
+          if (lat && lon) return [lat, lon];
+        }
+      }
+    } catch (e) {
+      console.warn('Geocoding lookup note:', e);
+    }
+  }
+
+  return fallbackDefault;
+}
+
+let currentRoadPath = [];
 let routeGlowPolyline = null;
 
 async function loadDynamicRoadRoute(startCoord, endCoord, mapInstance) {
+  currentRoadPath = [startCoord, endCoord];
   try {
     const url = `https://router.project-osrm.org/route/v1/driving/${startCoord[1]},${startCoord[0]};${endCoord[1]},${endCoord[0]}?overview=full&geometries=geojson`;
     const res = await fetch(url);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates) {
-      const roadWaypoints = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-      if (roadWaypoints.length > 5) {
-        currentRoadPath = roadWaypoints;
-
-        if (routeGlowPolyline && mapInstance.hasLayer(routeGlowPolyline)) mapInstance.removeLayer(routeGlowPolyline);
-        if (routePolyline && mapInstance.hasLayer(routePolyline)) mapInstance.removeLayer(routePolyline);
-
-        routeGlowPolyline = L.polyline(currentRoadPath, {
-          color: '#0B5D7A',
-          weight: 8,
-          opacity: 0.35,
-          lineCap: 'round',
-          lineJoin: 'round'
-        }).addTo(mapInstance);
-
-        routePolyline = L.polyline(currentRoadPath, {
-          color: '#00B4D8',
-          weight: 4.5,
-          opacity: 0.95,
-          lineCap: 'round',
-          lineJoin: 'round'
-        }).addTo(mapInstance);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates) {
+        const roadWaypoints = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+        if (roadWaypoints.length >= 2) {
+          currentRoadPath = roadWaypoints;
+        }
       }
     }
   } catch (err) {
     console.warn('OSRM road route fetch note:', err);
+    currentRoadPath = [startCoord, endCoord];
   }
+
+  if (routeGlowPolyline && mapInstance.hasLayer(routeGlowPolyline)) mapInstance.removeLayer(routeGlowPolyline);
+  if (routePolyline && mapInstance.hasLayer(routePolyline)) mapInstance.removeLayer(routePolyline);
+
+  const pathToDraw = (currentRoadPath && currentRoadPath.length >= 2) ? currentRoadPath : [startCoord, endCoord];
+
+  routeGlowPolyline = L.polyline(pathToDraw, {
+    color: '#0B5D7A',
+    weight: 8,
+    opacity: 0.35,
+    lineCap: 'round',
+    lineJoin: 'round'
+  }).addTo(mapInstance);
+
+  routePolyline = L.polyline(pathToDraw, {
+    color: '#00B4D8',
+    weight: 4.5,
+    opacity: 0.95,
+    lineCap: 'round',
+    lineJoin: 'round'
+  }).addTo(mapInstance);
 }
 
 function initLeafletMap() {
   const mapEl = document.getElementById('leafletMap');
   if (!mapEl || typeof L === 'undefined') return;
 
-  const defaultCoords = [10.2350, 123.7750];
+  if (leafletMap) return;
+
+  const defaultCoords = [10.3157, 123.8854];
   leafletMap = L.map('leafletMap', {
     zoomControl: true,
     attributionControl: false
@@ -649,69 +798,100 @@ function initLeafletMap() {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
   }).addTo(leafletMap);
+}
 
-  // Origin Hatchery Marker (SRP Facility)
+async function initOrUpdateBuyerMap(data) {
+  const mapEl = document.getElementById('leafletMap');
+  if (!mapEl || typeof L === 'undefined') return;
+
+  const originAddress = data?.parties?.origin || 'Cebu City, Philippines';
+  const sellerName = data?.parties?.seller || 'Seller Origin Farm';
+  const destAddress = data?.parties?.destination || 'Carcar City, Cebu';
+  const buyerName = data?.parties?.buyer || 'Buyer Destination Farm';
+
+  const originCoords = await resolveLocationCoordinates(originAddress, [10.3157, 123.8854]);
+  const destCoords = await resolveLocationCoordinates(destAddress, [10.1060, 123.6420]);
+
+  if (!leafletMap) {
+    initLeafletMap();
+  }
+
+  if (!leafletMap) return;
+
+  // 1. Origin Marker (Seller)
   const originIcon = L.divIcon({
     className: 'custom-map-icon',
     html: `<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.hatchery}</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16]
   });
-  originMarker = L.marker(ROAD_ROUTE_COORDS[0], { icon: originIcon }).addTo(leafletMap)
-    .bindPopup('<b>Origin Hatchery Facility</b><br>Station Dispatch');
 
-  // Destination Farm Marker (Carcar)
+  if (!originMarker) {
+    originMarker = L.marker(originCoords, { icon: originIcon }).addTo(leafletMap);
+  } else {
+    originMarker.setLatLng(originCoords);
+  }
+  originMarker.bindPopup(`<b>Seller Origin Farm</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(originAddress)}</span>`);
+
+  // 2. Destination Marker (Buyer)
   const destIcon = L.divIcon({
     className: 'custom-map-icon',
     html: `<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.pin}</div>`,
     iconSize: [32, 32],
     iconAnchor: [16, 16]
   });
-  destMarker = L.marker(ROAD_ROUTE_COORDS[ROAD_ROUTE_COORDS.length - 1], { icon: destIcon }).addTo(leafletMap)
-    .bindPopup('<b>Destination Fish Farm</b><br>Receiving Facility');
 
-  // Live Transport Truck Marker
+  if (!destMarker) {
+    destMarker = L.marker(destCoords, { icon: destIcon }).addTo(leafletMap);
+  } else {
+    destMarker.setLatLng(destCoords);
+  }
+  destMarker.bindPopup(`<b>Buyer Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
+
+  // 3. Dynamic Road Route Calculation
+  await loadDynamicRoadRoute(originCoords, destCoords, leafletMap);
+
+  // 4. Live Transport Truck Marker
+  const stage = data?.status?.stage ?? 1;
+  const progressPercent = typeof data?.status?.progressPercent === 'number' ? data.status.progressPercent : (stage === 3 ? 100 : (stage === 2 ? 80 : 45));
+  const path = (currentRoadPath && currentRoadPath.length > 0) ? currentRoadPath : [originCoords, destCoords];
+  const idx = Math.min(path.length - 1, Math.max(0, Math.floor((progressPercent / 100) * (path.length - 1))));
+  const truckPos = (stage === 3) ? destCoords : (stage === 0 ? originCoords : (path[idx] || originCoords));
+
   const truckIcon = L.divIcon({
     className: 'custom-map-icon',
     html: `<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5);">${ICONS.truck}</div>`,
     iconSize: [36, 36],
     iconAnchor: [18, 18]
   });
-  truckMarker = L.marker(ROAD_ROUTE_COORDS[14], { icon: truckIcon }).addTo(leafletMap)
-    .bindPopup('<b>AquaSource Live Transport Unit</b>');
 
-  // Route Polyline Glow & Main Highway Path
-  routeGlowPolyline = L.polyline(ROAD_ROUTE_COORDS, {
-    color: '#0B5D7A',
-    weight: 8,
-    opacity: 0.35,
-    lineCap: 'round',
-    lineJoin: 'round'
-  }).addTo(leafletMap);
+  if (!truckMarker) {
+    truckMarker = L.marker(truckPos, { icon: truckIcon }).addTo(leafletMap);
+  } else {
+    truckMarker.setLatLng(truckPos);
+  }
+  truckMarker.bindPopup(`<b>AquaSource Live Transport Unit</b><br>Driver: ${escapeHtml(data?.transport?.driver || 'Transport Driver')}<br>From: ${escapeHtml(originAddress)}<br>To: ${escapeHtml(destAddress)}`);
 
-  routePolyline = L.polyline(ROAD_ROUTE_COORDS, {
-    color: '#00B4D8',
-    weight: 4.5,
-    opacity: 0.95,
-    lineCap: 'round',
-    lineJoin: 'round'
-  }).addTo(leafletMap);
+  // 5. Fit Map Bounds
+  const bounds = L.latLngBounds([originCoords, destCoords]);
+  leafletMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
 
-  // Fetch dynamic real turn-by-turn road geometry from routing network
-  loadDynamicRoadRoute(ROAD_ROUTE_COORDS[0], ROAD_ROUTE_COORDS[ROAD_ROUTE_COORDS.length - 1], leafletMap);
+  setTimeout(() => {
+    if (leafletMap) leafletMap.invalidateSize();
+  }, 200);
 }
 
 function updateMapPosition(lat, lng, stage, driver, progressPercent) {
   if (!leafletMap || !truckMarker) return;
 
-  const path = (currentRoadPath && currentRoadPath.length > 0) ? currentRoadPath : ROAD_ROUTE_COORDS;
+  const path = (currentRoadPath && currentRoadPath.length > 0) ? currentRoadPath : [[lat, lng]];
   let pct = typeof progressPercent === 'number' ? progressPercent : (stage === 3 ? 100 : (stage === 2 ? 80 : 45));
   const idx = Math.min(path.length - 1, Math.max(0, Math.floor((pct / 100) * (path.length - 1))));
   const pos = path[idx] || [lat, lng];
 
   truckMarker.setLatLng(pos);
   if (driver) {
-    truckMarker.setPopupContent(`<b>AquaSource Live Transport Unit</b><br>Driver: ${driver}`);
+    truckMarker.setPopupContent(`<b>AquaSource Live Transport Unit</b><br>Driver: ${escapeHtml(driver)}`);
   }
   leafletMap.panTo(pos);
 }
