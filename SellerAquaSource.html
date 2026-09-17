@@ -261,10 +261,26 @@
         </div>
 
         <div class="field" style="position:relative;">
+          <label>Seller Origin Farm Address *</label>
+          <div class="input-wrap autocomplete-wrap">
+            <input class="input" id="originInput" placeholder="e.g. Talisay City, Cebu" autocomplete="off">
+            <div class="autocomplete-dropdown" id="originDropdown" style="display:none;"></div>
+          </div>
+        </div>
+
+        <div class="field" style="position:relative;">
           <label>Buyer / Destination Farm Name *</label>
           <div class="input-wrap autocomplete-wrap">
             <input class="input" id="buyerNameInput" placeholder="e.g. Green Water Tilapia Farm" autocomplete="off">
             <div class="autocomplete-dropdown" id="buyerNameDropdown" style="display:none;"></div>
+          </div>
+        </div>
+
+        <div class="field" style="position:relative;">
+          <label>Destination Farm Address *</label>
+          <div class="input-wrap autocomplete-wrap">
+            <input class="input" id="destInput" placeholder="e.g. Mandaue City, Cebu" autocomplete="off">
+            <div class="autocomplete-dropdown" id="destDropdown" style="display:none;"></div>
           </div>
         </div>
 
@@ -282,15 +298,7 @@
           </div>
         </div>
 
-        <div class="field" style="position:relative;">
-          <label>Destination Farm Address *</label>
-          <div class="input-wrap autocomplete-wrap">
-            <input class="input" id="destInput" placeholder="e.g. Carcar City, Cebu" autocomplete="off">
-            <div class="autocomplete-dropdown" id="destDropdown" style="display:none;"></div>
-          </div>
-        </div>
-
-        <div class="field">
+        <div class="field" style="grid-column: 1 / -1;">
           <label>Dispatch Date &amp; Time</label>
           <div class="input-wrap">
             <input class="input" id="dispatchInput" type="datetime-local">
@@ -317,10 +325,26 @@
       <div class="modal-sub" id="editOrderCodeSub">Update details for Tracking Code</div>
 
       <div class="field" style="position:relative;">
+        <label>Seller Origin Farm Address *</label>
+        <div class="input-wrap autocomplete-wrap">
+          <input class="input" id="editOrderOrigin" placeholder="e.g. Talisay City, Cebu" autocomplete="off">
+          <div class="autocomplete-dropdown" id="editOriginDropdown" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div class="field" style="position:relative;">
         <label>Buyer / Receiving Farm Name *</label>
         <div class="input-wrap autocomplete-wrap">
           <input class="input" id="editOrderBuyer" placeholder="e.g. Green Water Farms" autocomplete="off">
           <div class="autocomplete-dropdown" id="editBuyerDropdown" style="display:none;"></div>
+        </div>
+      </div>
+
+      <div class="field" style="position:relative;">
+        <label>Delivery Farm Destination Address *</label>
+        <div class="input-wrap autocomplete-wrap">
+          <input class="input" id="editOrderDest" placeholder="e.g. Mandaue City, Cebu" autocomplete="off">
+          <div class="autocomplete-dropdown" id="editDestDropdown" style="display:none;"></div>
         </div>
       </div>
 
@@ -335,14 +359,6 @@
         <label>Fingerling Quantity (pcs) *</label>
         <div class="input-wrap">
           <input class="input" id="editOrderQty" type="number" placeholder="e.g. 5000">
-        </div>
-      </div>
-
-      <div class="field" style="position:relative;">
-        <label>Delivery Farm Destination Address *</label>
-        <div class="input-wrap autocomplete-wrap">
-          <input class="input" id="editOrderDest" placeholder="e.g. Carcar Fish Pond, Cebu" autocomplete="off">
-          <div class="autocomplete-dropdown" id="editDestDropdown" style="display:none;"></div>
         </div>
       </div>
 

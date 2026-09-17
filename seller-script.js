@@ -742,6 +742,7 @@ function openEditOrderModal(id) {
   editingOrderId = o.id || o.code;
 
   const codeSub = document.getElementById('editOrderCodeSub');
+  const originInput = document.getElementById('editOrderOrigin');
   const buyerInput = document.getElementById('editOrderBuyer');
   const speciesInput = document.getElementById('editOrderSpecies');
   const qtyInput = document.getElementById('editOrderQty');
@@ -749,6 +750,7 @@ function openEditOrderModal(id) {
   const driverInput = document.getElementById('editOrderPersonnel');
 
   if (codeSub) codeSub.textContent = `Tracking #${o.code || o.id}`;
+  if (originInput) originInput.value = o.origin || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
   if (buyerInput) buyerInput.value = o.buyer || '';
   if (speciesInput) speciesInput.value = o.species || '';
   if (qtyInput) qtyInput.value = o.quantity || '';
@@ -770,6 +772,7 @@ function closeEditOrderModal() {
 async function saveEditedOrder() {
   if (!editingOrderId) return;
 
+  const originInput = document.getElementById('editOrderOrigin');
   const buyerInput = document.getElementById('editOrderBuyer');
   const speciesInput = document.getElementById('editOrderSpecies');
   const qtyInput = document.getElementById('editOrderQty');
@@ -777,12 +780,18 @@ async function saveEditedOrder() {
   const driverInput = document.getElementById('editOrderPersonnel');
   const btn = document.getElementById('editOrderSubmitBtn');
 
+  const origin = originInput ? originInput.value.trim() : '';
   const buyer = buyerInput ? buyerInput.value.trim() : '';
   const species = speciesInput ? speciesInput.value.trim() : 'Tilapia Fingerlings';
   const qty = qtyInput ? parseInt(qtyInput.value, 10) : 0;
   const dest = destInput ? destInput.value.trim() : '';
   const personnel = driverInput ? driverInput.value.trim() : '';
 
+  if (!origin || origin.length < 2) {
+    showToast('Please enter the seller origin address.');
+    if (originInput) originInput.focus();
+    return;
+  }
   if (!buyer || buyer.length < 2) {
     showToast('Please enter the buyer / farm name.');
     if (buyerInput) buyerInput.focus();
@@ -793,7 +802,7 @@ async function saveEditedOrder() {
     if (qtyInput) qtyInput.focus();
     return;
   }
-  if (!dest || dest.length < 3) {
+  if (!dest || dest.length < 2) {
     showToast('Please enter the destination address.');
     if (destInput) destInput.focus();
     return;
@@ -806,6 +815,7 @@ async function saveEditedOrder() {
     }
 
     const updatedFields = {
+      origin: origin,
       buyer: buyer,
       species: species,
       quantity: qty,
@@ -842,7 +852,101 @@ async function saveEditedOrder() {
    GOOGLE MAPS STYLE PLACE AUTOCOMPLETE & GEOCODING ENGINE
    ========================================================================= */
 
+function isWithinPhilippines(lat, lon) {
+  return typeof lat === 'number' && typeof lon === 'number' &&
+         !isNaN(lat) && !isNaN(lon) &&
+         lat >= 4.5 && lat <= 21.5 &&
+         lon >= 116.0 && lon <= 127.0;
+}
+
 const KNOWN_PLACE_COORDINATES = {
+  // Metro Cebu (Talisay, Mandaue, Cebu City, Lapu-Lapu, Cordova, Minglanilla, Naga)
+  'talisay': [10.2550, 123.8400],
+  'talisay city': [10.2550, 123.8400],
+  'talisay cebu': [10.2550, 123.8400],
+  'talisay cebu city': [10.2550, 123.8400],
+  'tabunok': [10.2600, 123.8350],
+  'tabunok talisay': [10.2600, 123.8350],
+  'bulacao talisay': [10.2650, 123.8450],
+  'dumlog': [10.2450, 123.8420],
+  'pooc': [10.2442, 123.8115],
+  'tangke': [10.2450, 123.8210],
+  'san roque talisay': [10.2472, 123.8320],
+  'cansojong': [10.2520, 123.8380],
+  'poblacion talisay': [10.2550, 123.8400],
+  'mohon talisay': [10.2530, 123.8250],
+  'lagtang': [10.2680, 123.8300],
+  'lawaan i': [10.2435, 123.8030],
+  'lawaan ii': [10.2428, 123.7940],
+  'linao talisay': [10.2415, 123.7850],
+
+  'mandaue': [10.3400, 123.9400],
+  'mandaue city': [10.3400, 123.9400],
+  'mandaue cebu': [10.3400, 123.9400],
+  'subangdaku': [10.3250, 123.9250],
+  'tipolo': [10.3280, 123.9300],
+  'guizo': [10.3320, 123.9380],
+  'centro mandaue': [10.3400, 123.9400],
+  'banilad mandaue': [10.3450, 123.9300],
+  'cabancalan': [10.3550, 123.9350],
+  'maguikay': [10.3420, 123.9450],
+  'bakilid': [10.3370, 123.9350],
+  'jagobiao': [10.3700, 123.9550],
+  'basak mandaue': [10.3600, 123.9450],
+  'canduman': [10.3680, 123.9400],
+  'casuntingan': [10.3500, 123.9350],
+  'alang-alang': [10.3350, 123.9450],
+  'umapad': [10.3380, 123.9550],
+  'opao': [10.3300, 123.9500],
+  'paknaan': [10.3550, 123.9550],
+  'tingub': [10.3620, 123.9480],
+
+  'cebu': [10.3157, 123.8854],
+  'cebu city': [10.3157, 123.8854],
+  'srp': [10.2750, 123.8650],
+  'south road properties': [10.2750, 123.8650],
+  'lahug': [10.3350, 123.8950],
+  'mabolo': [10.3200, 123.9150],
+  'guadalupe cebu': [10.3250, 123.8800],
+  'banilad cebu': [10.3400, 123.9150],
+  'labangon': [10.3050, 123.8750],
+  'mambaling': [10.2900, 123.8700],
+  'pardo': [10.2800, 123.8600],
+  'bulacao cebu': [10.2720, 123.8520],
+  'tisa': [10.3000, 123.8700],
+  'punta princesa': [10.2950, 123.8680],
+  'inayawan': [10.2750, 123.8580],
+  'talamban': [10.3700, 123.9150],
+
+  'lapu-lapu': [10.3150, 123.9500],
+  'lapu lapu': [10.3150, 123.9500],
+  'lapu-lapu city': [10.3150, 123.9500],
+  'mactan': [10.3000, 123.9800],
+  'pusok': [10.3250, 123.9650],
+  'marigondon': [10.2750, 123.9800],
+  'cordova': [10.2500, 123.9500],
+
+  'minglanilla': [10.2440, 123.7970],
+  'poblacion ward 1': [10.2440, 123.7970],
+  'poblacion ward 2': [10.2430, 123.7950],
+  'tungkil': [10.2420, 123.7760],
+  'calajoan': [10.2410, 123.7670],
+  'calajo-an': [10.2410, 123.7670],
+  'lipata': [10.2355, 123.7530],
+  'tungkop': [10.2310, 123.7480],
+
+  'naga': [10.2070, 123.7570],
+  'naga city': [10.2070, 123.7570],
+  'colon': [10.2015, 123.7410],
+  'tinaan': [10.2180, 123.7420],
+  'inoburan': [10.1900, 123.7450],
+  'langtad': [10.1825, 123.7435],
+  'pangdan': [10.1920, 123.7425],
+
+  'san fernando': [10.1550, 123.7280],
+  'san isidro': [10.1550, 123.7280],
+  'sangat': [10.1380, 123.7130],
+
   'carcar': [10.1060, 123.6420],
   'carcar city': [10.1060, 123.6420],
   'carcar fish pond': [10.1085, 123.6480],
@@ -859,42 +963,27 @@ const KNOWN_PLACE_COORDINATES = {
   'guadalupe': [10.1380, 123.6150],
   'can-asujan': [10.1450, 123.6000],
   'perrelos': [10.1290, 123.7040],
-  'naga': [10.2070, 123.7570],
-  'naga city': [10.2070, 123.7570],
-  'colon': [10.2015, 123.7410],
-  'tinaan': [10.2180, 123.7420],
-  'inoburan': [10.1900, 123.7450],
-  'san fernando': [10.1550, 123.7280],
-  'minglanilla': [10.2440, 123.7970],
-  'poblacion ward 1': [10.2440, 123.7970],
-  'talisay': [10.2550, 123.8400],
-  'talisay city': [10.2550, 123.8400],
-  'srp': [10.2750, 123.8650],
-  'south road properties': [10.2750, 123.8650],
-  'cebu': [10.3157, 123.8854],
-  'cebu city': [10.3157, 123.8854],
-  'mandaue': [10.3400, 123.9400],
-  'mandaue city': [10.3400, 123.9400],
-  'lapu-lapu': [10.3150, 123.9500],
-  'lapu-lapu city': [10.3150, 123.9500],
-  'liloan': [10.3950, 123.9980],
-  'consolacion': [10.3700, 123.9550],
-  'compostela': [10.4550, 124.0150],
-  'danao': [10.5200, 124.0300],
-  'danao city': [10.5200, 124.0300],
-  'carmen': [10.5800, 124.0200],
-  'catmon': [10.6800, 124.0100],
-  'sogod': [10.7500, 124.0000],
-  'borbon': [10.8300, 124.0200],
-  'tabogon': [10.9300, 124.0300],
-  'bogo': [11.0500, 124.0050],
-  'bogo city': [11.0500, 124.0050],
-  'san remigio': [10.9900, 123.9300],
-  'medellin': [11.1300, 123.9600],
-  'daanbantayan': [11.2550, 124.0200],
-  'bantayan': [11.1700, 123.7200],
-  'santa fe': [11.1550, 123.8050],
-  'madridejos': [11.2600, 123.7300],
+
+  'sibonga': [10.0150, 123.6200],
+  'argao': [9.8800, 123.6000],
+  'dalaguete': [9.7600, 123.5350],
+  'alcoy': [9.7150, 123.5100],
+  'boljoon': [9.6450, 123.4800],
+  'oslob': [9.5200, 123.4300],
+  'santander': [9.4200, 123.3400],
+  'samboan': [9.5250, 123.3050],
+  'ginatilan': [9.5700, 123.3250],
+  'malabuyoc': [9.6600, 123.3150],
+  'alegria': [9.7600, 123.3600],
+  'badian': [9.8650, 123.3950],
+  'moalboal': [9.9550, 123.4000],
+  'alcantara': [9.9750, 123.4150],
+  'ronda': [9.9950, 123.4450],
+  'dumanjug': [10.0550, 123.4900],
+  'barili': [10.1450, 123.5300],
+  'japitan': [10.1550, 123.5100],
+  'aloguinsan': [10.2250, 123.5500],
+  'pinamungajan': [10.2700, 123.5850],
   'toledo': [10.3750, 123.6400],
   'toledo city': [10.3750, 123.6400],
   'bato': [10.3600, 123.6300],
@@ -902,45 +991,35 @@ const KNOWN_PLACE_COORDINATES = {
   'asturias': [10.5650, 123.7550],
   'tuburan': [10.7300, 123.8250],
   'tabuelan': [10.9000, 123.8750],
-  'pinamungajan': [10.2700, 123.5850],
-  'aloguinsan': [10.2250, 123.5500],
-  'barili': [10.1450, 123.5300],
-  'japitan': [10.1550, 123.5100],
-  'dumanjug': [10.0550, 123.4900],
-  'ronda': [9.9950, 123.4450],
-  'alcantara': [9.9750, 123.4150],
-  'moalboal': [9.9550, 123.4000],
-  'badian': [9.8650, 123.3950],
-  'alegria': [9.7600, 123.3600],
-  'malabuyoc': [9.6600, 123.3150],
-  'ginatilan': [9.5700, 123.3250],
-  'samboan': [9.5250, 123.3050],
-  'santander': [9.4200, 123.3400],
-  'oslob': [9.5200, 123.4300],
-  'boljoon': [9.6450, 123.4800],
-  'alcoy': [9.7150, 123.5100],
-  'dalaguete': [9.7600, 123.5350],
-  'argao': [9.8800, 123.6000],
-  'sibonga': [10.0150, 123.6200],
-  'cordova': [10.2500, 123.9500],
+  'san remigio': [10.9900, 123.9300],
+  'medellin': [11.1300, 123.9600],
+  'daanbantayan': [11.2550, 124.0200],
+  'bogo': [11.0500, 124.0050],
+  'bogo city': [11.0500, 124.0050],
+  'tabogon': [10.9300, 124.0300],
+  'borbon': [10.8300, 124.0200],
+  'sogod': [10.7500, 124.0000],
+  'catmon': [10.6800, 124.0100],
+  'carmen': [10.5800, 124.0200],
+  'danao': [10.5200, 124.0300],
+  'danao city': [10.5200, 124.0300],
+  'compostela': [10.4550, 124.0150],
+  'liloan': [10.3950, 123.9980],
+  'consolacion': [10.3700, 123.9550],
+  'bantayan': [11.1700, 123.7200],
+  'santa fe': [11.1550, 123.8050],
+  'madridejos': [11.2600, 123.7300],
+
+  // Key Visayas, Mindanao & Luzon Centers
   'tagbilaran': [9.6500, 123.8500],
   'tagbilaran city': [9.6500, 123.8500],
   'panglao': [9.5800, 123.7700],
-  'calape': [9.8900, 123.8700],
-  'tubigon': [9.9500, 123.9600],
-  'ubay': [10.0500, 124.4700],
-  'talibon': [10.1500, 124.3300],
   'dumaguete': [9.3100, 123.3000],
   'dumaguete city': [9.3100, 123.3000],
-  'bais': [9.5900, 123.1200],
-  'bais city': [9.5900, 123.1200],
-  'tanjay': [9.5100, 123.1500],
-  'tanjay city': [9.5100, 123.1500],
   'bacolod': [10.6700, 122.9500],
   'bacolod city': [10.6700, 122.9500],
   'iloilo': [10.7200, 122.5600],
   'iloilo city': [10.7200, 122.5600],
-  'roxas': [11.5850, 122.7500],
   'roxas city': [11.5850, 122.7500],
   'kalibo': [11.7100, 122.3650],
   'tacloban': [11.2400, 125.0000],
@@ -957,48 +1036,59 @@ const KNOWN_PLACE_COORDINATES = {
   'cagayan de oro': [8.4542, 124.6319],
   'general santos': [6.1164, 125.1716],
   'zamboanga': [6.9214, 122.0790],
-  'zamboanga city': [6.9214, 122.0790],
-  'angeles': [15.1450, 120.5900],
-  'angeles city': [15.1450, 120.5900],
-  'baguio': [16.4023, 120.5960],
-  'baguio city': [16.4023, 120.5960],
-  'dagupan': [16.0430, 120.3330],
-  'dagupan city': [16.0430, 120.3330]
+  'zamboanga city': [6.9214, 122.0790]
 };
 
-async function resolveLocationCoordinates(addressText, fallbackDefault = [10.3157, 123.8854]) {
-  if (!addressText || typeof addressText !== 'string' || addressText.trim() === '') {
-    return fallbackDefault;
-  }
-  const clean = addressText.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay/gi, ' ').replace(/[^\w\s]/g, ' ').trim();
-  const rawClean = addressText.toLowerCase().trim();
+async function resolveLocationCoordinates(addressText, secondaryText = '', fallbackDefault = [10.3157, 123.8854]) {
+  const primary = (addressText || '').trim();
+  const secondary = (secondaryText || '').trim();
+  const combined = `${primary} ${secondary}`.trim();
+  if (!combined) return fallbackDefault;
 
-  // 1. Direct match on key in local dictionary
-  for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-    if (rawClean === key || rawClean.startsWith(key + ',') || rawClean.includes(key)) {
-      return coords;
-    }
-  }
+  const candidates = [primary, secondary, combined].filter(Boolean);
 
-  // 2. Tokenized matching
-  const tokens = clean.split(/\s+/).filter(t => t.length > 2);
-  for (const t of tokens) {
+  // 1. Direct and Substring Check on KNOWN_PLACE_COORDINATES
+  for (const text of candidates) {
+    const rawClean = text.toLowerCase().trim();
     for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-      if (key === t || key.includes(t)) {
-        return coords;
+      if (rawClean === key || rawClean.includes(key) || key.includes(rawClean)) {
+        if (isWithinPhilippines(coords[0], coords[1])) {
+          return coords;
+        }
       }
     }
   }
 
-  // 3. Photon Geocoding fallback if online
+  // 2. Tokenized word-level matching
+  for (const text of candidates) {
+    const cleanTokens = text.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay|farm|hatchery|pond/gi, ' ').replace(/[^\w\s]/g, ' ').split(/\s+/).filter(t => t.length > 2);
+    for (const t of cleanTokens) {
+      for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
+        if (key === t || key.startsWith(t) || key.includes(t)) {
+          if (isWithinPhilippines(coords[0], coords[1])) {
+            return coords;
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Online Photon Geocoding bounded strictly to Philippines
   if (navigator.onLine) {
     try {
-      const resp = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(addressText)}&limit=1&lat=10.3157&lon=123.8854`);
+      const q = encodeURIComponent(`${primary || secondary} Philippines`);
+      const resp = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=3&lat=10.3157&lon=123.8854&bbox=116.0,4.5,127.0,21.5`);
       if (resp.ok) {
         const json = await resp.json();
-        if (json && json.features && json.features[0] && json.features[0].geometry) {
-          const [lon, lat] = json.features[0].geometry.coordinates;
-          if (lat && lon) return [lat, lon];
+        if (json && json.features && json.features.length > 0) {
+          for (const feature of json.features) {
+            if (feature.geometry && feature.geometry.coordinates) {
+              const [lon, lat] = feature.geometry.coordinates;
+              if (isWithinPhilippines(lat, lon)) {
+                return [lat, lon];
+              }
+            }
+          }
         }
       }
     } catch (e) {
@@ -1010,35 +1100,88 @@ async function resolveLocationCoordinates(addressText, fallbackDefault = [10.315
 }
 
 const GOOGLE_MAPS_PLACES = [
+  // Talisay City & Barangays
+  { main: 'Talisay City', sub: 'Cebu' },
+  { main: 'Tabunok', sub: 'Talisay City, Cebu' },
+  { main: 'Bulacao', sub: 'Talisay City, Cebu' },
+  { main: 'Dumlog', sub: 'Talisay City, Cebu' },
+  { main: 'Pooc', sub: 'Talisay City, Cebu' },
+  { main: 'Tangke', sub: 'Talisay City, Cebu' },
+  { main: 'San Roque', sub: 'Talisay City, Cebu' },
+  { main: 'Cansojong', sub: 'Talisay City, Cebu' },
+  { main: 'Poblacion', sub: 'Talisay City, Cebu' },
+  { main: 'Mohon', sub: 'Talisay City, Cebu' },
+  { main: 'Lagtang', sub: 'Talisay City, Cebu' },
+  { main: 'Lawaan I', sub: 'Talisay City, Cebu' },
+  { main: 'Lawaan II', sub: 'Talisay City, Cebu' },
+  { main: 'Linao', sub: 'Talisay City, Cebu' },
+
+  // Mandaue City & Barangays
+  { main: 'Mandaue City', sub: 'Cebu' },
+  { main: 'Subangdaku', sub: 'Mandaue City, Cebu' },
+  { main: 'Tipolo', sub: 'Mandaue City, Cebu' },
+  { main: 'Guizo', sub: 'Mandaue City, Cebu' },
+  { main: 'Centro', sub: 'Mandaue City, Cebu' },
+  { main: 'Banilad', sub: 'Mandaue City, Cebu' },
+  { main: 'Cabancalan', sub: 'Mandaue City, Cebu' },
+  { main: 'Maguikay', sub: 'Mandaue City, Cebu' },
+  { main: 'Bakilid', sub: 'Mandaue City, Cebu' },
+  { main: 'Jagobiao', sub: 'Mandaue City, Cebu' },
+  { main: 'Basak', sub: 'Mandaue City, Cebu' },
+  { main: 'Canduman', sub: 'Mandaue City, Cebu' },
+  { main: 'Casuntingan', sub: 'Mandaue City, Cebu' },
+  { main: 'Alang-alang', sub: 'Mandaue City, Cebu' },
+  { main: 'Umapad', sub: 'Mandaue City, Cebu' },
+  { main: 'Opao', sub: 'Mandaue City, Cebu' },
+  { main: 'Paknaan', sub: 'Mandaue City, Cebu' },
+  { main: 'Tingub', sub: 'Mandaue City, Cebu' },
+
+  // Cebu City & Barangays
+  { main: 'Cebu City', sub: 'Cebu' },
+  { main: 'SRP (South Road Properties)', sub: 'Cebu City, Cebu' },
+  { main: 'Lahug', sub: 'Cebu City, Cebu' },
+  { main: 'Mabolo', sub: 'Cebu City, Cebu' },
+  { main: 'Guadalupe', sub: 'Cebu City, Cebu' },
+  { main: 'Banilad', sub: 'Cebu City, Cebu' },
+  { main: 'Labangon', sub: 'Cebu City, Cebu' },
+  { main: 'Mambaling', sub: 'Cebu City, Cebu' },
+  { main: 'Pardo', sub: 'Cebu City, Cebu' },
+  { main: 'Bulacao', sub: 'Cebu City, Cebu' },
+  { main: 'Tisa', sub: 'Cebu City, Cebu' },
+  { main: 'Punta Princesa', sub: 'Cebu City, Cebu' },
+  { main: 'Inayawan', sub: 'Cebu City, Cebu' },
+  { main: 'Talamban', sub: 'Cebu City, Cebu' },
+  { main: 'Kasambagan', sub: 'Cebu City, Cebu' },
+  { main: 'Apas', sub: 'Cebu City, Cebu' },
+  { main: 'Capitol Site', sub: 'Cebu City, Cebu' },
+
+  // Lapu-Lapu City & Cordova
+  { main: 'Lapu-Lapu City', sub: 'Cebu' },
+  { main: 'Mactan', sub: 'Lapu-Lapu City, Cebu' },
+  { main: 'Pusok', sub: 'Lapu-Lapu City, Cebu' },
+  { main: 'Marigondon', sub: 'Lapu-Lapu City, Cebu' },
+  { main: 'Cordova', sub: 'Cebu' },
+
+  // South Cebu (Minglanilla, Naga, San Fernando, Carcar, etc.)
+  { main: 'Minglanilla', sub: 'Cebu' },
+  { main: 'Poblacion Ward 1', sub: 'Minglanilla, Cebu' },
+  { main: 'Poblacion Ward 2', sub: 'Minglanilla, Cebu' },
+  { main: 'Tungkil', sub: 'Minglanilla, Cebu' },
+  { main: 'Calajo-an', sub: 'Minglanilla, Cebu' },
+  { main: 'Lipata', sub: 'Minglanilla, Cebu' },
+  { main: 'Tungkop', sub: 'Minglanilla, Cebu' },
+  { main: 'Naga City', sub: 'Cebu' },
+  { main: 'Colon', sub: 'Naga City, Cebu' },
+  { main: 'Tinaan', sub: 'Naga City, Cebu' },
+  { main: 'Inoburan', sub: 'Naga City, Cebu' },
+  { main: 'Langtad', sub: 'Naga City, Cebu' },
+  { main: 'Pangdan', sub: 'Naga City, Cebu' },
   { main: 'San Fernando', sub: 'Cebu' },
-  { main: 'San Fernando', sub: 'Pampanga' },
-  { main: 'San Francisco', sub: 'CA, USA' },
-  { main: 'San Fernando', sub: 'Cebu City, Cebu' },
-  { main: 'San Fernando el Rey Parish', sub: 'Liloan, Cebu' },
-  { main: 'San Fernando', sub: 'La Union' },
-  { main: 'San Fernando', sub: 'Bukidnon' },
-  { main: 'San Francisco', sub: 'Camotes Islands, Cebu' },
-  { main: 'San Francisco', sub: 'Agusan del Sur' },
-  { main: 'San Jose', sub: 'Cebu City, Cebu' },
-  { main: 'San Jose', sub: 'Dinagat Islands' },
-  { main: 'San Jose', sub: 'Occidental Mindoro' },
-  { main: 'San Jose', sub: 'Antique' },
-  { main: 'San Jose', sub: 'CA, USA' },
-  { main: 'San Diego', sub: 'CA, USA' },
-  { main: 'San Antonio', sub: 'TX, USA' },
-  { main: 'San Juan', sub: 'Metro Manila' },
-  { main: 'San Juan', sub: 'La Union' },
-  { main: 'San Juan', sub: 'Siquijor' },
-  { main: 'San Mateo', sub: 'Rizal' },
-  { main: 'San Pedro', sub: 'Laguna' },
-  { main: 'San Pablo', sub: 'Laguna' },
-  { main: 'San Remigio', sub: 'Cebu' },
-  { main: 'San Remigio', sub: 'Antique' },
-  { main: 'San Carlos City', sub: 'Negros Occidental' },
-  { main: 'San Carlos City', sub: 'Pangasinan' },
-  { main: 'Carcar', sub: 'Cebu' },
+  { main: 'San Isidro', sub: 'San Fernando, Cebu' },
+  { main: 'Sangat', sub: 'San Fernando, Cebu' },
   { main: 'Carcar City', sub: 'Cebu' },
   { main: 'Carcar Rotunda', sub: 'Carcar City, Cebu' },
+  { main: 'Carcar Fish Pond', sub: 'Carcar City, Cebu' },
   { main: 'Valladolid', sub: 'Carcar City, Cebu' },
   { main: 'Tuyom', sub: 'Carcar City, Cebu' },
   { main: 'Liburon', sub: 'Carcar City, Cebu' },
@@ -1048,77 +1191,55 @@ const GOOGLE_MAPS_PLACES = [
   { main: 'Bolinawan', sub: 'Carcar City, Cebu' },
   { main: 'Ocaña', sub: 'Carcar City, Cebu' },
   { main: 'Guadalupe', sub: 'Carcar City, Cebu' },
-  { main: 'Can-asujan', sub: 'Carcar City, Cebu' },
   { main: 'Perrelos', sub: 'Carcar City, Cebu' },
-  { main: 'Naga', sub: 'Cebu' },
-  { main: 'Naga City', sub: 'Cebu' },
-  { main: 'Colon', sub: 'Naga City, Cebu' },
-  { main: 'Tinaan', sub: 'Naga City, Cebu' },
-  { main: 'Inoburan', sub: 'Naga City, Cebu' },
-  { main: 'Toledo', sub: 'Cebu' },
-  { main: 'Toledo City', sub: 'Cebu' },
-  { main: 'Bato', sub: 'Toledo City, Cebu' },
+  { main: 'Sibonga', sub: 'Cebu' },
+  { main: 'Argao', sub: 'Cebu' },
+  { main: 'Dalaguete', sub: 'Cebu' },
+  { main: 'Alcoy', sub: 'Cebu' },
+  { main: 'Boljoon', sub: 'Cebu' },
+  { main: 'Oslob', sub: 'Cebu' },
+  { main: 'Santander', sub: 'Cebu' },
+  { main: 'Samboan', sub: 'Cebu' },
+  { main: 'Ginatilan', sub: 'Cebu' },
+  { main: 'Malabuyoc', sub: 'Cebu' },
+  { main: 'Alegria', sub: 'Cebu' },
+  { main: 'Badian', sub: 'Cebu' },
+  { main: 'Moalboal', sub: 'Cebu' },
+  { main: 'Alcantara', sub: 'Cebu' },
+  { main: 'Ronda', sub: 'Cebu' },
+  { main: 'Dumanjug', sub: 'Cebu' },
   { main: 'Barili', sub: 'Cebu' },
   { main: 'Japitan', sub: 'Barili, Cebu' },
-  { main: 'Argao', sub: 'Cebu' },
-  { main: 'Bogo', sub: 'Argao, Cebu' },
-  { main: 'Balamban', sub: 'Cebu' },
-  { main: 'Bogo', sub: 'Cebu' },
-  { main: 'Bogo City', sub: 'Cebu' },
-  { main: 'Danao', sub: 'Cebu' },
-  { main: 'Danao City', sub: 'Cebu' },
-  { main: 'Minglanilla', sub: 'Cebu' },
-  { main: 'Poblacion Ward 1', sub: 'Minglanilla, Cebu' },
-  { main: 'Talisay', sub: 'Cebu' },
-  { main: 'Talisay City', sub: 'Cebu' },
-  { main: 'SRP (South Road Properties)', sub: 'Cebu City, Cebu' },
-  { main: 'Cebu City', sub: 'Cebu' },
-  { main: 'Mandaue', sub: 'Cebu' },
-  { main: 'Mandaue City', sub: 'Cebu' },
-  { main: 'Lapu-Lapu City', sub: 'Cebu' },
-  { main: 'Liloan', sub: 'Cebu' },
-  { main: 'Consolacion', sub: 'Cebu' },
-  { main: 'Compostela', sub: 'Cebu' },
-  { main: 'Carmen', sub: 'Cebu' },
-  { main: 'Catmon', sub: 'Cebu' },
-  { main: 'Sogod', sub: 'Cebu' },
-  { main: 'Medellin', sub: 'Cebu' },
-  { main: 'Daanbantayan', sub: 'Cebu' },
-  { main: 'Bantayan', sub: 'Bantayan Island, Cebu' },
-  { main: 'Santa Fe', sub: 'Bantayan Island, Cebu' },
-  { main: 'Madridejos', sub: 'Bantayan Island, Cebu' },
-  { main: 'Dumanjug', sub: 'Cebu' },
-  { main: 'Ronda', sub: 'Cebu' },
-  { main: 'Alcantara', sub: 'Cebu' },
-  { main: 'Moalboal', sub: 'Cebu' },
-  { main: 'Badian', sub: 'Cebu' },
-  { main: 'Alegria', sub: 'Cebu' },
-  { main: 'Malabuyoc', sub: 'Cebu' },
-  { main: 'Ginatilan', sub: 'Cebu' },
-  { main: 'Samboan', sub: 'Cebu' },
-  { main: 'Santander', sub: 'Cebu' },
-  { main: 'Oslob', sub: 'Cebu' },
-  { main: 'Boljoon', sub: 'Cebu' },
-  { main: 'Alcoy', sub: 'Cebu' },
-  { main: 'Dalaguete', sub: 'Cebu' },
-  { main: 'Sibonga', sub: 'Cebu' },
   { main: 'Aloguinsan', sub: 'Cebu' },
   { main: 'Pinamungajan', sub: 'Cebu' },
+  { main: 'Toledo City', sub: 'Cebu' },
+  { main: 'Bato', sub: 'Toledo City, Cebu' },
+  { main: 'Balamban', sub: 'Cebu' },
   { main: 'Asturias', sub: 'Cebu' },
   { main: 'Tuburan', sub: 'Cebu' },
   { main: 'Tabuelan', sub: 'Cebu' },
+  { main: 'San Remigio', sub: 'Cebu' },
+  { main: 'Medellin', sub: 'Cebu' },
+  { main: 'Daanbantayan', sub: 'Cebu' },
+  { main: 'Bogo City', sub: 'Cebu' },
   { main: 'Tabogon', sub: 'Cebu' },
   { main: 'Borbon', sub: 'Cebu' },
-  { main: 'Cordova', sub: 'Cebu' },
+  { main: 'Sogod', sub: 'Cebu' },
+  { main: 'Catmon', sub: 'Cebu' },
+  { main: 'Carmen', sub: 'Cebu' },
+  { main: 'Danao City', sub: 'Cebu' },
+  { main: 'Compostela', sub: 'Cebu' },
+  { main: 'Liloan', sub: 'Cebu' },
+  { main: 'Consolacion', sub: 'Cebu' },
+  { main: 'Bantayan', sub: 'Bantayan Island, Cebu' },
+  { main: 'Santa Fe', sub: 'Bantayan Island, Cebu' },
+  { main: 'Madridejos', sub: 'Bantayan Island, Cebu' },
+  { main: 'San Francisco', sub: 'Camotes Islands, Cebu' },
+
+  // Key Visayas, Mindanao & Luzon Centers
   { main: 'Tagbilaran City', sub: 'Bohol' },
   { main: 'Panglao', sub: 'Bohol' },
-  { main: 'Calape', sub: 'Bohol' },
-  { main: 'Tubigon', sub: 'Bohol' },
-  { main: 'Ubay', sub: 'Bohol' },
-  { main: 'Talibon', sub: 'Bohol' },
   { main: 'Dumaguete City', sub: 'Negros Oriental' },
-  { main: 'Bais City', sub: 'Negros Oriental' },
-  { main: 'Tanjay City', sub: 'Negros Oriental' },
   { main: 'Bacolod City', sub: 'Negros Occidental' },
   { main: 'Iloilo City', sub: 'Iloilo' },
   { main: 'Roxas City', sub: 'Capiz' },
@@ -1358,8 +1479,10 @@ function setupAutocomplete(inputId, dropdownId) {
 }
 
 function initOrderAutocomplete() {
+  setupAutocomplete('originInput', 'originDropdown');
   setupAutocomplete('buyerNameInput', 'buyerNameDropdown');
   setupAutocomplete('destInput', 'destDropdown');
+  setupAutocomplete('editOrderOrigin', 'editOriginDropdown');
   setupAutocomplete('editOrderBuyer', 'editBuyerDropdown');
   setupAutocomplete('editOrderDest', 'editDestDropdown');
   setupAutocomplete('editAddress', 'editAddressDropdown');
@@ -1380,6 +1503,7 @@ function openNewOrderModal() {
   selectedUnit = null;
 
   const sel = document.getElementById('personnelSelect');
+  const originInput = document.getElementById('originInput');
   const buyerInput = document.getElementById('buyerNameInput');
   const speciesInput = document.getElementById('speciesInput');
   const qtyInput = document.getElementById('qtyInput');
@@ -1389,6 +1513,9 @@ function openNewOrderModal() {
   if (sel) {
     sel.innerHTML = 'Select transport personnel<span>▾</span>';
     sel.classList.add('placeholder');
+  }
+  if (originInput) {
+    originInput.value = (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
   }
   if (buyerInput) buyerInput.value = '';
   if (speciesInput) speciesInput.value = 'Tilapia Fingerlings';
@@ -1485,12 +1612,14 @@ function pickUnit(unitId) {
 }
 
 async function createOrder() {
+  const originInput = document.getElementById('originInput');
   const buyerInput = document.getElementById('buyerNameInput');
   const speciesInput = document.getElementById('speciesInput');
   const qtyInput = document.getElementById('qtyInput');
   const destInput = document.getElementById('destInput');
   const dispatchInput = document.getElementById('dispatchInput');
 
+  const origin = originInput ? (originInput.value.trim() || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu') : ((sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu');
   const buyer = buyerInput ? buyerInput.value.trim() : '';
   const species = speciesInput ? speciesInput.value.trim() : 'Tilapia Fingerlings';
   const qty = qtyInput ? parseInt(qtyInput.value, 10) : 0;
@@ -1503,8 +1632,14 @@ async function createOrder() {
     return;
   }
 
+  if (!origin || origin.length < 2) {
+    showToast('Please enter the seller origin farm address.');
+    if (originInput) originInput.focus();
+    return;
+  }
+
   if (!buyer || buyer.length < 2) {
-    showToast('Please enter the buyer / aquaculture farm name.');
+    showToast('Please enter the buyer / destination farm name.');
     if (buyerInput) buyerInput.focus();
     return;
   }
@@ -1515,7 +1650,7 @@ async function createOrder() {
     return;
   }
 
-  if (!dest || dest.length < 3) {
+  if (!dest || dest.length < 2) {
     showToast('Please enter the delivery destination address.');
     if (destInput) destInput.focus();
     return;
@@ -1546,13 +1681,12 @@ async function createOrder() {
 
   const matchedStaff = personnel.find(p => p.name === selectedPersonnel || `${p.firstName || ''} ${p.lastName || ''}`.trim() === selectedPersonnel);
 
-  const sellerOrigin = (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Cebu City, Philippines';
   const sellerHatchery = (sellerProfile && (sellerProfile.hatcheryName || sellerProfile.farmName || sellerProfile.hatchery)) || 'Aquaculture Hatchery Station';
 
   const newOrderData = {
     sellerId: (currentUser && currentUser.uid) || (sellerProfile && sellerProfile.uid) || 'default_seller',
     sellerName: sellerHatchery,
-    origin: sellerOrigin,
+    origin: origin,
     code: code,
     buyer: buyer,
     species: species,
@@ -1667,19 +1801,19 @@ async function initOrUpdateSellerMap(order) {
   const mapContainer = document.getElementById('sellerDetailMap');
   if (!mapContainer || typeof L === 'undefined') return;
 
-  const sellerOrigin = order.origin || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Cebu City, Philippines';
+  const sellerOrigin = order.origin || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
   const sellerName = order.sellerName || (sellerProfile && (sellerProfile.hatcheryName || sellerProfile.farmName || sellerProfile.hatchery)) || 'Seller Origin Farm';
-  const destAddress = order.dest || order.destination || 'Carcar City, Cebu';
+  const destAddress = order.dest || order.destination || 'Mandaue City, Cebu';
   const buyerName = order.buyer || 'Buyer Destination Farm';
 
-  const originCoords = await resolveLocationCoordinates(sellerOrigin, [10.3157, 123.8854]);
-  const destCoords = await resolveLocationCoordinates(destAddress, [10.1060, 123.6420]);
+  const originCoords = await resolveLocationCoordinates(sellerOrigin, sellerName, [10.2550, 123.8400]);
+  const destCoords = await resolveLocationCoordinates(destAddress, buyerName, [10.3400, 123.9400]);
 
   if (!sellerDetailMap) {
     sellerDetailMap = L.map('sellerDetailMap', {
       zoomControl: true,
       attributionControl: false
-    }).setView(originCoords, 11);
+    }).setView(originCoords, 12);
 
     // High-Definition Google Maps Layer
     L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
@@ -1696,7 +1830,7 @@ async function initOrUpdateSellerMap(order) {
       iconAnchor: [16, 16]
     });
     sellerOriginMarker = L.marker(originCoords, { icon: originIcon }).addTo(sellerDetailMap)
-      .bindPopup(`<b>Seller Origin Farm</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(sellerOrigin)}</span>`);
+      .bindPopup(`<b>Seller Farm Origin</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(sellerOrigin)}</span>`);
 
     // Destination Farm Marker
     const destIcon = L.divIcon({
@@ -1711,18 +1845,18 @@ async function initOrUpdateSellerMap(order) {
     // Live Transport Truck Marker
     const truckIcon = L.divIcon({
       className: 'custom-map-icon',
-      html: '<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div>',
+      html: '<div style="background:#00B4D8; color:#fff; border-radius:50%; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 4px 14px rgba(0,180,216,0.5);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg></div>',
       iconSize: [36, 36],
       iconAnchor: [18, 18]
     });
     sellerTruckMarker = L.marker(originCoords, { icon: truckIcon }).addTo(sellerDetailMap)
-      .bindPopup(`<b>${escapeHtml(order.code)} Transport Unit</b><br>Driver: ${escapeHtml(order.personnel || 'Driver')}`);
+      .bindPopup(`<b>${escapeHtml(order.code)} Transport Unit</b><br>Driver: ${escapeHtml(order.personnel || 'Driver')}<br>From: ${escapeHtml(sellerOrigin)}<br>To: ${escapeHtml(destAddress)}`);
 
     await loadDynamicSellerRoadRoute(originCoords, destCoords, sellerDetailMap);
   } else {
     if (sellerOriginMarker) {
       sellerOriginMarker.setLatLng(originCoords);
-      sellerOriginMarker.bindPopup(`<b>Seller Origin Farm</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(sellerOrigin)}</span>`);
+      sellerOriginMarker.bindPopup(`<b>Seller Farm Origin</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(sellerOrigin)}</span>`);
     }
     if (sellerDestMarker) {
       sellerDestMarker.setLatLng(destCoords);

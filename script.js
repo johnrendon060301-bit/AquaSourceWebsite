@@ -569,7 +569,101 @@ function escapeHtml(str) {
    DYNAMIC GEOCODING & ROUTING ENGINE
    ========================================================================= */
 
+function isWithinPhilippines(lat, lon) {
+  return typeof lat === 'number' && typeof lon === 'number' &&
+         !isNaN(lat) && !isNaN(lon) &&
+         lat >= 4.5 && lat <= 21.5 &&
+         lon >= 116.0 && lon <= 127.0;
+}
+
 const KNOWN_PLACE_COORDINATES = {
+  // Metro Cebu (Talisay, Mandaue, Cebu City, Lapu-Lapu, Cordova, Minglanilla, Naga)
+  'talisay': [10.2550, 123.8400],
+  'talisay city': [10.2550, 123.8400],
+  'talisay cebu': [10.2550, 123.8400],
+  'talisay cebu city': [10.2550, 123.8400],
+  'tabunok': [10.2600, 123.8350],
+  'tabunok talisay': [10.2600, 123.8350],
+  'bulacao talisay': [10.2650, 123.8450],
+  'dumlog': [10.2450, 123.8420],
+  'pooc': [10.2442, 123.8115],
+  'tangke': [10.2450, 123.8210],
+  'san roque talisay': [10.2472, 123.8320],
+  'cansojong': [10.2520, 123.8380],
+  'poblacion talisay': [10.2550, 123.8400],
+  'mohon talisay': [10.2530, 123.8250],
+  'lagtang': [10.2680, 123.8300],
+  'lawaan i': [10.2435, 123.8030],
+  'lawaan ii': [10.2428, 123.7940],
+  'linao talisay': [10.2415, 123.7850],
+
+  'mandaue': [10.3400, 123.9400],
+  'mandaue city': [10.3400, 123.9400],
+  'mandaue cebu': [10.3400, 123.9400],
+  'subangdaku': [10.3250, 123.9250],
+  'tipolo': [10.3280, 123.9300],
+  'guizo': [10.3320, 123.9380],
+  'centro mandaue': [10.3400, 123.9400],
+  'banilad mandaue': [10.3450, 123.9300],
+  'cabancalan': [10.3550, 123.9350],
+  'maguikay': [10.3420, 123.9450],
+  'bakilid': [10.3370, 123.9350],
+  'jagobiao': [10.3700, 123.9550],
+  'basak mandaue': [10.3600, 123.9450],
+  'canduman': [10.3680, 123.9400],
+  'casuntingan': [10.3500, 123.9350],
+  'alang-alang': [10.3350, 123.9450],
+  'umapad': [10.3380, 123.9550],
+  'opao': [10.3300, 123.9500],
+  'paknaan': [10.3550, 123.9550],
+  'tingub': [10.3620, 123.9480],
+
+  'cebu': [10.3157, 123.8854],
+  'cebu city': [10.3157, 123.8854],
+  'srp': [10.2750, 123.8650],
+  'south road properties': [10.2750, 123.8650],
+  'lahug': [10.3350, 123.8950],
+  'mabolo': [10.3200, 123.9150],
+  'guadalupe cebu': [10.3250, 123.8800],
+  'banilad cebu': [10.3400, 123.9150],
+  'labangon': [10.3050, 123.8750],
+  'mambaling': [10.2900, 123.8700],
+  'pardo': [10.2800, 123.8600],
+  'bulacao cebu': [10.2720, 123.8520],
+  'tisa': [10.3000, 123.8700],
+  'punta princesa': [10.2950, 123.8680],
+  'inayawan': [10.2750, 123.8580],
+  'talamban': [10.3700, 123.9150],
+
+  'lapu-lapu': [10.3150, 123.9500],
+  'lapu lapu': [10.3150, 123.9500],
+  'lapu-lapu city': [10.3150, 123.9500],
+  'mactan': [10.3000, 123.9800],
+  'pusok': [10.3250, 123.9650],
+  'marigondon': [10.2750, 123.9800],
+  'cordova': [10.2500, 123.9500],
+
+  'minglanilla': [10.2440, 123.7970],
+  'poblacion ward 1': [10.2440, 123.7970],
+  'poblacion ward 2': [10.2430, 123.7950],
+  'tungkil': [10.2420, 123.7760],
+  'calajoan': [10.2410, 123.7670],
+  'calajo-an': [10.2410, 123.7670],
+  'lipata': [10.2355, 123.7530],
+  'tungkop': [10.2310, 123.7480],
+
+  'naga': [10.2070, 123.7570],
+  'naga city': [10.2070, 123.7570],
+  'colon': [10.2015, 123.7410],
+  'tinaan': [10.2180, 123.7420],
+  'inoburan': [10.1900, 123.7450],
+  'langtad': [10.1825, 123.7435],
+  'pangdan': [10.1920, 123.7425],
+
+  'san fernando': [10.1550, 123.7280],
+  'san isidro': [10.1550, 123.7280],
+  'sangat': [10.1380, 123.7130],
+
   'carcar': [10.1060, 123.6420],
   'carcar city': [10.1060, 123.6420],
   'carcar fish pond': [10.1085, 123.6480],
@@ -586,42 +680,27 @@ const KNOWN_PLACE_COORDINATES = {
   'guadalupe': [10.1380, 123.6150],
   'can-asujan': [10.1450, 123.6000],
   'perrelos': [10.1290, 123.7040],
-  'naga': [10.2070, 123.7570],
-  'naga city': [10.2070, 123.7570],
-  'colon': [10.2015, 123.7410],
-  'tinaan': [10.2180, 123.7420],
-  'inoburan': [10.1900, 123.7450],
-  'san fernando': [10.1550, 123.7280],
-  'minglanilla': [10.2440, 123.7970],
-  'poblacion ward 1': [10.2440, 123.7970],
-  'talisay': [10.2550, 123.8400],
-  'talisay city': [10.2550, 123.8400],
-  'srp': [10.2750, 123.8650],
-  'south road properties': [10.2750, 123.8650],
-  'cebu': [10.3157, 123.8854],
-  'cebu city': [10.3157, 123.8854],
-  'mandaue': [10.3400, 123.9400],
-  'mandaue city': [10.3400, 123.9400],
-  'lapu-lapu': [10.3150, 123.9500],
-  'lapu-lapu city': [10.3150, 123.9500],
-  'liloan': [10.3950, 123.9980],
-  'consolacion': [10.3700, 123.9550],
-  'compostela': [10.4550, 124.0150],
-  'danao': [10.5200, 124.0300],
-  'danao city': [10.5200, 124.0300],
-  'carmen': [10.5800, 124.0200],
-  'catmon': [10.6800, 124.0100],
-  'sogod': [10.7500, 124.0000],
-  'borbon': [10.8300, 124.0200],
-  'tabogon': [10.9300, 124.0300],
-  'bogo': [11.0500, 124.0050],
-  'bogo city': [11.0500, 124.0050],
-  'san remigio': [10.9900, 123.9300],
-  'medellin': [11.1300, 123.9600],
-  'daanbantayan': [11.2550, 124.0200],
-  'bantayan': [11.1700, 123.7200],
-  'santa fe': [11.1550, 123.8050],
-  'madridejos': [11.2600, 123.7300],
+
+  'sibonga': [10.0150, 123.6200],
+  'argao': [9.8800, 123.6000],
+  'dalaguete': [9.7600, 123.5350],
+  'alcoy': [9.7150, 123.5100],
+  'boljoon': [9.6450, 123.4800],
+  'oslob': [9.5200, 123.4300],
+  'santander': [9.4200, 123.3400],
+  'samboan': [9.5250, 123.3050],
+  'ginatilan': [9.5700, 123.3250],
+  'malabuyoc': [9.6600, 123.3150],
+  'alegria': [9.7600, 123.3600],
+  'badian': [9.8650, 123.3950],
+  'moalboal': [9.9550, 123.4000],
+  'alcantara': [9.9750, 123.4150],
+  'ronda': [9.9950, 123.4450],
+  'dumanjug': [10.0550, 123.4900],
+  'barili': [10.1450, 123.5300],
+  'japitan': [10.1550, 123.5100],
+  'aloguinsan': [10.2250, 123.5500],
+  'pinamungajan': [10.2700, 123.5850],
   'toledo': [10.3750, 123.6400],
   'toledo city': [10.3750, 123.6400],
   'bato': [10.3600, 123.6300],
@@ -629,45 +708,35 @@ const KNOWN_PLACE_COORDINATES = {
   'asturias': [10.5650, 123.7550],
   'tuburan': [10.7300, 123.8250],
   'tabuelan': [10.9000, 123.8750],
-  'pinamungajan': [10.2700, 123.5850],
-  'aloguinsan': [10.2250, 123.5500],
-  'barili': [10.1450, 123.5300],
-  'japitan': [10.1550, 123.5100],
-  'dumanjug': [10.0550, 123.4900],
-  'ronda': [9.9950, 123.4450],
-  'alcantara': [9.9750, 123.4150],
-  'moalboal': [9.9550, 123.4000],
-  'badian': [9.8650, 123.3950],
-  'alegria': [9.7600, 123.3600],
-  'malabuyoc': [9.6600, 123.3150],
-  'ginatilan': [9.5700, 123.3250],
-  'samboan': [9.5250, 123.3050],
-  'santander': [9.4200, 123.3400],
-  'oslob': [9.5200, 123.4300],
-  'boljoon': [9.6450, 123.4800],
-  'alcoy': [9.7150, 123.5100],
-  'dalaguete': [9.7600, 123.5350],
-  'argao': [9.8800, 123.6000],
-  'sibonga': [10.0150, 123.6200],
-  'cordova': [10.2500, 123.9500],
+  'san remigio': [10.9900, 123.9300],
+  'medellin': [11.1300, 123.9600],
+  'daanbantayan': [11.2550, 124.0200],
+  'bogo': [11.0500, 124.0050],
+  'bogo city': [11.0500, 124.0050],
+  'tabogon': [10.9300, 124.0300],
+  'borbon': [10.8300, 124.0200],
+  'sogod': [10.7500, 124.0000],
+  'catmon': [10.6800, 124.0100],
+  'carmen': [10.5800, 124.0200],
+  'danao': [10.5200, 124.0300],
+  'danao city': [10.5200, 124.0300],
+  'compostela': [10.4550, 124.0150],
+  'liloan': [10.3950, 123.9980],
+  'consolacion': [10.3700, 123.9550],
+  'bantayan': [11.1700, 123.7200],
+  'santa fe': [11.1550, 123.8050],
+  'madridejos': [11.2600, 123.7300],
+
+  // Key Visayas, Mindanao & Luzon Centers
   'tagbilaran': [9.6500, 123.8500],
   'tagbilaran city': [9.6500, 123.8500],
   'panglao': [9.5800, 123.7700],
-  'calape': [9.8900, 123.8700],
-  'tubigon': [9.9500, 123.9600],
-  'ubay': [10.0500, 124.4700],
-  'talibon': [10.1500, 124.3300],
   'dumaguete': [9.3100, 123.3000],
   'dumaguete city': [9.3100, 123.3000],
-  'bais': [9.5900, 123.1200],
-  'bais city': [9.5900, 123.1200],
-  'tanjay': [9.5100, 123.1500],
-  'tanjay city': [9.5100, 123.1500],
   'bacolod': [10.6700, 122.9500],
   'bacolod city': [10.6700, 122.9500],
   'iloilo': [10.7200, 122.5600],
   'iloilo city': [10.7200, 122.5600],
-  'roxas': [11.5850, 122.7500],
   'roxas city': [11.5850, 122.7500],
   'kalibo': [11.7100, 122.3650],
   'tacloban': [11.2400, 125.0000],
@@ -684,48 +753,59 @@ const KNOWN_PLACE_COORDINATES = {
   'cagayan de oro': [8.4542, 124.6319],
   'general santos': [6.1164, 125.1716],
   'zamboanga': [6.9214, 122.0790],
-  'zamboanga city': [6.9214, 122.0790],
-  'angeles': [15.1450, 120.5900],
-  'angeles city': [15.1450, 120.5900],
-  'baguio': [16.4023, 120.5960],
-  'baguio city': [16.4023, 120.5960],
-  'dagupan': [16.0430, 120.3330],
-  'dagupan city': [16.0430, 120.3330]
+  'zamboanga city': [6.9214, 122.0790]
 };
 
-async function resolveLocationCoordinates(addressText, fallbackDefault = [10.3157, 123.8854]) {
-  if (!addressText || typeof addressText !== 'string' || addressText.trim() === '') {
-    return fallbackDefault;
-  }
-  const clean = addressText.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay/gi, ' ').replace(/[^\w\s]/g, ' ').trim();
-  const rawClean = addressText.toLowerCase().trim();
+async function resolveLocationCoordinates(addressText, secondaryText = '', fallbackDefault = [10.3157, 123.8854]) {
+  const primary = (addressText || '').trim();
+  const secondary = (secondaryText || '').trim();
+  const combined = `${primary} ${secondary}`.trim();
+  if (!combined) return fallbackDefault;
 
-  // 1. Direct match on key in local dictionary
-  for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-    if (rawClean === key || rawClean.startsWith(key + ',') || rawClean.includes(key)) {
-      return coords;
-    }
-  }
+  const candidates = [primary, secondary, combined].filter(Boolean);
 
-  // 2. Tokenized matching
-  const tokens = clean.split(/\s+/).filter(t => t.length > 2);
-  for (const t of tokens) {
+  // 1. Direct and Substring Check on KNOWN_PLACE_COORDINATES
+  for (const text of candidates) {
+    const rawClean = text.toLowerCase().trim();
     for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-      if (key === t || key.includes(t)) {
-        return coords;
+      if (rawClean === key || rawClean.includes(key) || key.includes(rawClean)) {
+        if (isWithinPhilippines(coords[0], coords[1])) {
+          return coords;
+        }
       }
     }
   }
 
-  // 3. Photon Geocoding fallback if online
+  // 2. Tokenized word-level matching
+  for (const text of candidates) {
+    const cleanTokens = text.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay|farm|hatchery|pond/gi, ' ').replace(/[^\w\s]/g, ' ').split(/\s+/).filter(t => t.length > 2);
+    for (const t of cleanTokens) {
+      for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
+        if (key === t || key.startsWith(t) || key.includes(t)) {
+          if (isWithinPhilippines(coords[0], coords[1])) {
+            return coords;
+          }
+        }
+      }
+    }
+  }
+
+  // 3. Online Photon Geocoding bounded strictly to Philippines
   if (navigator.onLine) {
     try {
-      const resp = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(addressText)}&limit=1&lat=10.3157&lon=123.8854`);
+      const q = encodeURIComponent(`${primary || secondary} Philippines`);
+      const resp = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=3&lat=10.3157&lon=123.8854&bbox=116.0,4.5,127.0,21.5`);
       if (resp.ok) {
         const json = await resp.json();
-        if (json && json.features && json.features[0] && json.features[0].geometry) {
-          const [lon, lat] = json.features[0].geometry.coordinates;
-          if (lat && lon) return [lat, lon];
+        if (json && json.features && json.features.length > 0) {
+          for (const feature of json.features) {
+            if (feature.geometry && feature.geometry.coordinates) {
+              const [lon, lat] = feature.geometry.coordinates;
+              if (isWithinPhilippines(lat, lon)) {
+                return [lat, lon];
+              }
+            }
+          }
         }
       }
     } catch (e) {
@@ -786,7 +866,7 @@ function initLeafletMap() {
 
   if (leafletMap) return;
 
-  const defaultCoords = [10.3157, 123.8854];
+  const defaultCoords = [10.2550, 123.8400];
   leafletMap = L.map('leafletMap', {
     zoomControl: true,
     attributionControl: false
@@ -804,13 +884,13 @@ async function initOrUpdateBuyerMap(data) {
   const mapEl = document.getElementById('leafletMap');
   if (!mapEl || typeof L === 'undefined') return;
 
-  const originAddress = data?.parties?.origin || 'Cebu City, Philippines';
+  const originAddress = data?.parties?.origin || 'Talisay City, Cebu';
   const sellerName = data?.parties?.seller || 'Seller Origin Farm';
-  const destAddress = data?.parties?.destination || 'Carcar City, Cebu';
+  const destAddress = data?.parties?.destination || 'Mandaue City, Cebu';
   const buyerName = data?.parties?.buyer || 'Buyer Destination Farm';
 
-  const originCoords = await resolveLocationCoordinates(originAddress, [10.3157, 123.8854]);
-  const destCoords = await resolveLocationCoordinates(destAddress, [10.1060, 123.6420]);
+  const originCoords = await resolveLocationCoordinates(originAddress, sellerName, [10.2550, 123.8400]);
+  const destCoords = await resolveLocationCoordinates(destAddress, buyerName, [10.3400, 123.9400]);
 
   if (!leafletMap) {
     initLeafletMap();
@@ -831,7 +911,7 @@ async function initOrUpdateBuyerMap(data) {
   } else {
     originMarker.setLatLng(originCoords);
   }
-  originMarker.bindPopup(`<b>Seller Origin Farm</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(originAddress)}</span>`);
+  originMarker.bindPopup(`<b>Seller Farm Origin</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(originAddress)}</span>`);
 
   // 2. Destination Marker (Buyer)
   const destIcon = L.divIcon({
