@@ -753,47 +753,125 @@ const KNOWN_PLACE_COORDINATES = {
   'cagayan de oro': [8.4542, 124.6319],
   'general santos': [6.1164, 125.1716],
   'zamboanga': [6.9214, 122.0790],
-  'zamboanga city': [6.9214, 122.0790]
+  'zamboanga city': [6.9214, 122.0790],
+
+  // Major Cebu & Regional Landmarks, Malls, Ports & Public Facilities
+  'sm seaside': [10.2818, 123.8817],
+  'sm seaside city cebu': [10.2818, 123.8817],
+  'sm seaside cebu': [10.2818, 123.8817],
+  'sm city cebu': [10.3117, 123.9184],
+  'sm cebu': [10.3117, 123.9184],
+  'ayala center cebu': [10.3173, 123.9056],
+  'ayala cebu': [10.3173, 123.9056],
+  'it park': [10.3297, 123.9066],
+  'cebu it park': [10.3297, 123.9066],
+  'robinsons galleria cebu': [10.3060, 123.9110],
+  'il corso': [10.2640, 123.8740],
+  'il corso srp': [10.2640, 123.8740],
+  'parkmall': [10.3242, 123.9333],
+  'parkmall mandaue': [10.3242, 123.9333],
+  'pacific mall mandaue': [10.3440, 123.9430],
+  'j centre mall': [10.3390, 123.9380],
+  'gaisano grand mall talisay': [10.2620, 123.8340],
+  'gaisano fiesta mall tabunok': [10.2625, 123.8360],
+  'gaisano tabunok': [10.2625, 123.8360],
+  'gaisano grand carcar': [10.1130, 123.6650],
+  'south town centre': [10.2680, 123.8400],
+  'cebu south bus terminal': [10.2985, 123.8938],
+  'south bus terminal': [10.2985, 123.8938],
+  'cebu north bus terminal': [10.3245, 123.9335],
+  'north bus terminal': [10.3245, 123.9335],
+  'mactan cebu international airport': [10.3075, 123.9790],
+  'mactan airport': [10.3075, 123.9790],
+  'mcia': [10.3075, 123.9790],
+  'cebu pier 1': [10.2950, 123.9070],
+  'cebu port': [10.3000, 123.9100],
+  'pier 1 cebu': [10.2950, 123.9070],
+  'pier 3 cebu': [10.3020, 123.9120],
+  'hagnaya port': [11.0450, 123.9450],
+  'maya port': [11.2650, 124.0500],
+  'toledo port': [10.3750, 123.6350],
+  'bato port santander': [9.4200, 123.3400],
+  'liloan port': [10.3950, 124.0050],
+  'tabunok public market': [10.2610, 123.8355],
+  'tabunok market': [10.2610, 123.8355],
+  'carbon market': [10.2915, 123.8990],
+  'carbon market cebu': [10.2915, 123.8990],
+  'pasil market': [10.2925, 123.8912],
+  'pasil fish port': [10.2925, 123.8912],
+  'mandaue city public market': [10.3340, 123.9420],
+  'carcar public market': [10.1080, 123.6450],
+  'naga boardwalk': [10.2075, 123.7585],
+  'naga city boardwalk': [10.2075, 123.7585],
+  'cebu provincial capitol': [10.3160, 123.8910],
+  'cebu capitol': [10.3160, 123.8910],
+  'talisay city hall': [10.2520, 123.8380],
+  'mandaue city hall': [10.3315, 123.9415],
+  'lapu-lapu city hall': [10.3140, 123.9510],
+  'naga city hall': [10.2080, 123.7580],
+  'carcar city hall': [10.1065, 123.6430],
+  'minglanilla municipal hall': [10.2445, 123.7975],
+  'san fernando municipal hall': [10.1555, 123.7285],
+  'barili municipal hall': [10.1455, 123.5305],
+  'toledo city hall': [10.3755, 123.6405],
+  'balamban municipal hall': [10.5005, 123.7155],
+  'danao city hall': [10.5205, 124.0305],
+  'vicente sotto': [10.3100, 123.8915],
+  'vsmmc': [10.3100, 123.8915],
+  'chong hua hospital': [10.3120, 123.8920],
+  'chong hua mandaue': [10.3235, 123.9315],
+  'ucmed': [10.3240, 123.9320],
+  'talisay district hospital': [10.2525, 123.8375],
+  'cebu doctors university hospital': [10.3135, 123.8930],
+  'usc talamban': [10.3540, 123.9125],
+  'university of san carlos': [10.3000, 123.8980],
+  'up cebu': [10.3200, 123.8990],
+  'cit university': [10.2950, 123.8800],
+  'uc main': [10.2980, 123.8990],
+  'usjr basak': [10.2920, 123.8680],
+  'bfar 7': [10.3015, 123.8965],
+  'bfar cebu': [10.3015, 123.8965],
+  'aquasource hatchery': [10.2550, 123.8400],
+  'carcar fish pond': [10.1085, 123.6480],
+  'barili fish sanctuary': [10.1450, 123.5300],
+  'carmen marine sanctuary': [10.5800, 124.0200],
+  'asturias tilapia farm': [10.5650, 123.7550],
+  'bantayan fishpond': [11.1700, 123.7200],
+  'talisay fish landing': [10.2450, 123.8210]
 };
 
 async function resolveLocationCoordinates(addressText, secondaryText = '', fallbackDefault = [10.3157, 123.8854]) {
   const primary = (addressText || '').trim();
   const secondary = (secondaryText || '').trim();
-  const combined = `${primary} ${secondary}`.trim();
-  if (!combined) return fallbackDefault;
+  if (!primary && !secondary) return fallbackDefault;
 
-  const candidates = [primary, secondary, combined].filter(Boolean);
+  const cleanPrimary = primary.toLowerCase().replace(/,\s*philippines/gi, '').replace(/,\s*cebu/gi, '').trim();
+  const combined = `${primary} ${secondary}`.trim().toLowerCase();
 
-  // 1. Direct and Substring Check on KNOWN_PLACE_COORDINATES
-  for (const text of candidates) {
-    const rawClean = text.toLowerCase().trim();
-    for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-      if (rawClean === key || rawClean.includes(key) || key.includes(rawClean)) {
-        if (isWithinPhilippines(coords[0], coords[1])) {
-          return coords;
-        }
-      }
+  const sortedKeys = Object.keys(KNOWN_PLACE_COORDINATES).sort((a, b) => b.length - a.length);
+
+  // 1. Exact direct match on primary address or clean primary
+  for (const key of sortedKeys) {
+    if (cleanPrimary === key || primary.toLowerCase() === key) {
+      const coords = KNOWN_PLACE_COORDINATES[key];
+      if (isWithinPhilippines(coords[0], coords[1])) return coords;
     }
   }
 
-  // 2. Tokenized word-level matching
-  for (const text of candidates) {
-    const cleanTokens = text.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay|farm|hatchery|pond/gi, ' ').replace(/[^\w\s]/g, ' ').split(/\s+/).filter(t => t.length > 2);
-    for (const t of cleanTokens) {
-      for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-        if (key === t || key.startsWith(t) || key.includes(t)) {
-          if (isWithinPhilippines(coords[0], coords[1])) {
-            return coords;
-          }
-        }
-      }
+  // 2. Specific landmark or place name match (ignoring generic 'cebu' and 'philippines')
+  for (const key of sortedKeys) {
+    if (key === 'cebu' || key === 'philippines' || key === 'cebu city') continue;
+    const regex = new RegExp('\\b' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+    if (regex.test(combined) || combined.includes(key)) {
+      const coords = KNOWN_PLACE_COORDINATES[key];
+      if (isWithinPhilippines(coords[0], coords[1])) return coords;
     }
   }
 
-  // 3. Online Photon Geocoding bounded strictly to Philippines
-  if (navigator.onLine) {
+  // 3. Online live geocoding lookup via Photon bounded to Philippines
+  if (navigator.onLine && primary) {
     try {
-      const q = encodeURIComponent(`${primary || secondary} Philippines`);
+      const q = encodeURIComponent(`${cleanPrimary || primary} Cebu Philippines`);
       const resp = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=3&lat=10.3157&lon=123.8854&bbox=116.0,4.5,127.0,21.5`);
       if (resp.ok) {
         const json = await resp.json();
@@ -811,6 +889,11 @@ async function resolveLocationCoordinates(addressText, secondaryText = '', fallb
     } catch (e) {
       console.warn('Geocoding lookup note:', e);
     }
+  }
+
+  // 4. Fallback check for Cebu City / generic Cebu
+  if (combined.includes('cebu') || combined.includes('philippines')) {
+    return KNOWN_PLACE_COORDINATES['cebu'] || fallbackDefault;
   }
 
   return fallbackDefault;
@@ -860,6 +943,92 @@ async function loadDynamicRoadRoute(startCoord, endCoord, mapInstance) {
   }).addTo(mapInstance);
 }
 
+const CEBU_KEY_LANDMARKS = [
+  // Aquaculture & Hatcheries
+  { name: 'BFAR Regional Office 7 Multi-Species Hatchery', type: 'hatchery', tag: 'BFAR Facility', coords: [10.3015, 123.8965], desc: 'Arellano Blvd, Cebu City · Government Central Marine Hatchery' },
+  { name: 'AquaSource Central Hatchery', type: 'hatchery', tag: 'Hatchery Station', coords: [10.2550, 123.8400], desc: 'Talisay City, Cebu · Fingerling Production & Testing Facility' },
+  { name: 'Carcar Fish Ponds & Aquaculture Center', type: 'hatchery', tag: 'Fish Ponds', coords: [10.1085, 123.6480], desc: 'Carcar City, Cebu · Freshwater Tilapia & Bangus Grow-out Ponds' },
+  { name: 'Barili Freshwater Fish Sanctuary', type: 'hatchery', tag: 'Fish Sanctuary', coords: [10.1450, 123.5300], desc: 'Barili, Cebu · Tilapia Breeding Farm & Fish Sanctuary' },
+  { name: 'Asturias Tilapia Breeding Farm', type: 'hatchery', tag: 'Tilapia Farm', coords: [10.5650, 123.7550], desc: 'Asturias, Cebu · Inland Aquaculture Ponds' },
+  { name: 'Bantayan Aqua Marine Farm', type: 'hatchery', tag: 'Marine Farm', coords: [11.1700, 123.7200], desc: 'Bantayan Island, Cebu · Marine Hatchery & Crab Ponds' },
+
+  // Commercial Malls & Centers
+  { name: 'SM Seaside City Cebu', type: 'mall', tag: 'Shopping Mall', coords: [10.2818, 123.8817], desc: 'South Road Properties (SRP), Cebu City' },
+  { name: 'SM City Cebu', type: 'mall', tag: 'Shopping Mall', coords: [10.3117, 123.9184], desc: 'North Reclamation Area, Cebu City' },
+  { name: 'Ayala Center Cebu', type: 'mall', tag: 'Business Center', coords: [10.3173, 123.9056], desc: 'Cebu Business Park, Cebu City' },
+  { name: 'Cebu IT Park', type: 'mall', tag: 'IT Hub', coords: [10.3297, 123.9066], desc: 'Lahug, Cebu City · Commercial & Tech District' },
+  { name: 'Parkmall Mandaue', type: 'mall', tag: 'Commercial Hub', coords: [10.3242, 123.9333], desc: 'Ouano Ave, Mandaue City' },
+  { name: 'Gaisano Fiesta Mall Tabunok', type: 'mall', tag: 'Shopping Mall', coords: [10.2625, 123.8360], desc: 'Tabunok, Talisay City, Cebu' },
+  { name: 'Gaisano Grand Carcar', type: 'mall', tag: 'Shopping Mall', coords: [10.1130, 123.6650], desc: 'Carcar City, Cebu' },
+
+  // Transport Hubs & Ports
+  { name: 'Cebu South Bus Terminal (CSBT)', type: 'transport', tag: 'Bus Terminal', coords: [10.2985, 123.8938], desc: 'N. Bacalso Ave, Cebu City · Main Southbound Transport Hub' },
+  { name: 'Cebu North Bus Terminal (CNBT)', type: 'transport', tag: 'Bus Terminal', coords: [10.3245, 123.9335], desc: 'Logarta Ave, Mandaue City · Main Northbound Transport Hub' },
+  { name: 'Mactan-Cebu International Airport (MCIA)', type: 'transport', tag: 'Airport', coords: [10.3075, 123.9790], desc: 'Lapu-Lapu City, Cebu · Terminal 1 & 2' },
+  { name: 'Cebu International Port / Pier 1', type: 'port', tag: 'Sea Port', coords: [10.2950, 123.9070], desc: 'Cebu City · Passenger & Cargo Sea Port' },
+  { name: 'Hagnaya Port', type: 'port', tag: 'Ferry Port', coords: [11.0450, 123.9450], desc: 'San Remigio, Cebu · Ferry Gate to Bantayan' },
+  { name: 'Toledo FastCat Sea Port', type: 'port', tag: 'Sea Port', coords: [10.3750, 123.6350], desc: 'Toledo City, Cebu · Ferry Gate to Negros' },
+  { name: 'Bato Ferry Terminal', type: 'port', tag: 'Ferry Port', coords: [9.4200, 123.3400], desc: 'Santander, Cebu · Southern Ferry Connection' },
+
+  // Public Markets & Fish Ports
+  { name: 'Tabunok Public Market', type: 'market', tag: 'Public Market', coords: [10.2610, 123.8355], desc: 'Talisay City, Cebu · Wholesale Agri-Fisheries Market' },
+  { name: 'Pasil Fish Port & Market', type: 'market', tag: 'Wholesale Fish Market', coords: [10.2925, 123.8912], desc: 'Pasil, Cebu City · Central Seafood Distribution' },
+  { name: 'Carbon Public Market', type: 'market', tag: 'Central Market', coords: [10.2915, 123.8990], desc: 'Cebu City · Historic Central Agri Market' },
+  { name: 'Mandaue City Public Market', type: 'market', tag: 'Public Market', coords: [10.3340, 123.9420], desc: 'Centro, Mandaue City, Cebu' },
+  { name: 'Carcar City Public Market', type: 'market', tag: 'Public Market', coords: [10.1080, 123.6450], desc: 'Carcar Rotunda, Carcar City, Cebu' },
+  { name: 'Naga City Boardwalk', type: 'market', tag: 'Baywalk Park', coords: [10.2075, 123.7585], desc: 'City of Naga, Cebu · Coastal Promenade' },
+
+  // Civic Government Centers
+  { name: 'Cebu Provincial Capitol', type: 'civic', tag: 'Provincial Capitol', coords: [10.3160, 123.8910], desc: 'Escario St, Cebu City' },
+  { name: 'Talisay City Hall', type: 'civic', tag: 'City Hall', coords: [10.2520, 123.8380], desc: 'Dumlog, Talisay City, Cebu' },
+  { name: 'Mandaue City Hall', type: 'civic', tag: 'City Hall', coords: [10.3315, 123.9415], desc: 'Centro, Mandaue City, Cebu' },
+  { name: 'Lapu-Lapu City Hall', type: 'civic', tag: 'City Hall', coords: [10.3140, 123.9510], desc: 'Pajo, Lapu-Lapu City, Cebu' },
+  { name: 'Naga City Hall', type: 'civic', tag: 'City Hall', coords: [10.2080, 123.7580], desc: 'Naga City, Cebu' },
+  { name: 'Carcar City Hall', type: 'civic', tag: 'City Hall', coords: [10.1065, 123.6430], desc: 'Carcar City, Cebu' },
+  { name: 'Minglanilla Municipal Hall', type: 'civic', tag: 'Municipal Hall', coords: [10.2445, 123.7975], desc: 'Minglanilla, Cebu' }
+];
+
+function buildLandmarksLayerGroup() {
+  const layer = L.layerGroup();
+  
+  const iconSVGs = {
+    hatchery: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12c.5-2.5 2.5-4 5-4 4 0 7 4 7 4s-3 4-7 4c-2.5 0-4.5-1.5-5-4z"></path><circle cx="9" cy="11" r="1"></circle></svg>',
+    mall: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
+    transport: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+    port: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>',
+    market: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
+    civic: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>'
+  };
+
+  CEBU_KEY_LANDMARKS.forEach(lm => {
+    const iconHtml = `
+      <div class="landmark-pin pin-${lm.type}" style="width:26px; height:26px;" title="${escapeHtml(lm.name)}">
+        ${iconSVGs[lm.type] || iconSVGs.civic}
+      </div>
+    `;
+    const landmarkIcon = L.divIcon({
+      className: 'custom-landmark-icon',
+      html: iconHtml,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    const marker = L.marker(lm.coords, { icon: landmarkIcon });
+    marker.bindPopup(`
+      <div style="font-size:13px; line-height:1.4;">
+        <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:800; background:#E8F7FB; color:#0B5D7A; text-transform:uppercase; margin-bottom:4px;">${escapeHtml(lm.tag)}</span>
+        <div style="font-weight:800; color:#1A3038; font-size:13.5px; margin-bottom:3px;">${escapeHtml(lm.name)}</div>
+        <div style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(lm.desc)}</div>
+      </div>
+    `);
+    marker.addTo(layer);
+  });
+
+  return layer;
+}
+
+let buyerLandmarksLayer = null;
+
 function initLeafletMap() {
   const mapEl = document.getElementById('leafletMap');
   if (!mapEl || typeof L === 'undefined') return;
@@ -869,15 +1038,51 @@ function initLeafletMap() {
   const defaultCoords = [10.2550, 123.8400];
   leafletMap = L.map('leafletMap', {
     zoomControl: true,
-    attributionControl: false
+    attributionControl: false,
+    maxZoom: 21
   }).setView(defaultCoords, 11);
 
-  // High-Definition Google Maps Layer
-  L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
+  // High-Definition Google Maps Base Layers
+  const googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+    maxZoom: 21,
+    maxNativeZoom: 20,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     attribution: '&copy; Google Maps'
-  }).addTo(leafletMap);
+  });
+
+  const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    maxZoom: 21,
+    maxNativeZoom: 20,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '&copy; Google Satellite'
+  });
+
+  const googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+    maxZoom: 21,
+    maxNativeZoom: 20,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+    attribution: '&copy; Google Terrain'
+  });
+
+  // Default to Google Streets
+  googleStreets.addTo(leafletMap);
+
+  // Build Landmarks & POI Overlay
+  buyerLandmarksLayer = buildLandmarksLayerGroup();
+  buyerLandmarksLayer.addTo(leafletMap); // Active by default
+
+  // Google Maps Layer & Overlay Switcher
+  const baseLayers = {
+    '🗺️ Google Map': googleStreets,
+    '🛰️ Satellite Hybrid': googleHybrid,
+    '🏔️ Terrain': googleTerrain
+  };
+  const overlays = {
+    '📍 Key Cebu Landmarks & POIs': buyerLandmarksLayer
+  };
+
+  L.control.layers(baseLayers, overlays, { position: 'topright' }).addTo(leafletMap);
+  L.control.scale({ imperial: false, metric: true, position: 'bottomleft' }).addTo(leafletMap);
 }
 
 async function initOrUpdateBuyerMap(data) {
@@ -898,27 +1103,12 @@ async function initOrUpdateBuyerMap(data) {
 
   if (!leafletMap) return;
 
-  // 1. Origin Marker (Seller)
-  const originIcon = L.divIcon({
-    className: 'custom-map-icon',
-    html: `<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.hatchery}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16]
-  });
-
-  if (!originMarker) {
-    originMarker = L.marker(originCoords, { icon: originIcon }).addTo(leafletMap);
-  } else {
-    originMarker.setLatLng(originCoords);
-  }
-  originMarker.bindPopup(`<b>Seller Farm Origin</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(originAddress)}</span>`);
-
-  // 2. Destination Marker (Buyer)
+  // Destination Marker (Buyer Farm)
   const destIcon = L.divIcon({
     className: 'custom-map-icon',
-    html: `<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.pin}</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16]
+    html: `<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);">${ICONS.pin}</div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17]
   });
 
   if (!destMarker) {
@@ -926,7 +1116,7 @@ async function initOrUpdateBuyerMap(data) {
   } else {
     destMarker.setLatLng(destCoords);
   }
-  destMarker.bindPopup(`<b>Buyer Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
+  destMarker.bindPopup(`<b>Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
 
   // 3. Dynamic Road Route Calculation
   await loadDynamicRoadRoute(originCoords, destCoords, leafletMap);

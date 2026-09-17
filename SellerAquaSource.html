@@ -261,47 +261,115 @@
         </div>
 
         <div class="field" style="position:relative;">
-          <label>Seller Origin Farm Address *</label>
-          <div class="input-wrap autocomplete-wrap">
-            <input class="input" id="originInput" placeholder="e.g. Talisay City, Cebu" autocomplete="off">
-            <div class="autocomplete-dropdown" id="originDropdown" style="display:none;"></div>
-          </div>
-        </div>
-
-        <div class="field" style="position:relative;">
-          <label>Buyer / Destination Farm Name *</label>
-          <div class="input-wrap autocomplete-wrap">
-            <input class="input" id="buyerNameInput" placeholder="e.g. Green Water Tilapia Farm" autocomplete="off">
+          <label>Buyer / Farm Name *</label>
+          <div class="input-wrap autocomplete-wrap has-ico">
+            <span class="input-ico-prefix">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </span>
+            <input class="input input-with-ico" id="buyerNameInput" placeholder="e.g. Green Water Tilapia Farm" autocomplete="off">
             <div class="autocomplete-dropdown" id="buyerNameDropdown" style="display:none;"></div>
           </div>
         </div>
 
-        <div class="field" style="position:relative;">
+        <div class="field" style="position:relative; grid-column: 1 / -1;">
           <label>Destination Farm Address *</label>
-          <div class="input-wrap autocomplete-wrap">
-            <input class="input" id="destInput" placeholder="e.g. Mandaue City, Cebu" autocomplete="off">
+          <div class="input-wrap autocomplete-wrap has-ico">
+            <span class="input-ico-prefix">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </span>
+            <input class="input input-with-ico" id="destInput" placeholder="e.g. Mandaue City, Cebu" autocomplete="off">
             <div class="autocomplete-dropdown" id="destDropdown" style="display:none;"></div>
           </div>
         </div>
 
         <div class="field">
           <label>Aquatic Species *</label>
-          <div class="input-wrap">
-            <input class="input" id="speciesInput" value="Tilapia Fingerlings">
+          <div class="input-wrap has-ico">
+            <span class="input-ico-prefix">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"></path><path d="M12 6v6l4 2"></path></svg>
+            </span>
+            <input class="input input-with-ico" id="speciesInput" value="Tilapia Fingerlings" placeholder="e.g. Tilapia Fingerlings">
           </div>
         </div>
 
         <div class="field">
           <label>Quantity (pcs) *</label>
-          <div class="input-wrap">
-            <input class="input" id="qtyInput" type="number" placeholder="e.g. 3000" min="1">
+          <div class="input-wrap has-ico">
+            <span class="input-ico-prefix">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </span>
+            <input class="input input-with-ico" id="qtyInput" type="number" placeholder="e.g. 3000" min="1">
           </div>
         </div>
 
-        <div class="field" style="grid-column: 1 / -1;">
-          <label>Dispatch Date &amp; Time</label>
-          <div class="input-wrap">
-            <input class="input" id="dispatchInput" type="datetime-local">
+        <div class="field custom-picker-field" style="position:relative;">
+          <label>Dispatch Date *</label>
+          <div class="custom-picker-trigger" id="datePickerTrigger" onclick="toggleDatePicker(event)">
+            <div class="custom-picker-ico">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div class="custom-picker-meta">
+              <span class="custom-picker-sub">Select a day</span>
+              <span class="custom-picker-val" id="selectedDateDisplay">--.--.----</span>
+            </div>
+            <div class="custom-picker-arrow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+
+          <input type="hidden" id="dispatchDate" value="">
+
+          <!-- FLOATING CALENDAR POPUP -->
+          <div class="custom-calendar-popup" id="customCalendarPopup" style="display:none;" onclick="event.stopPropagation()">
+            <div class="cal-header">
+              <div class="cal-month-title" id="calMonthTitle">September 2026</div>
+              <div class="cal-nav-btns">
+                <button type="button" class="cal-nav-btn" onclick="prevCalMonth(event)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                </button>
+                <button type="button" class="cal-nav-btn" onclick="nextCalMonth(event)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="cal-weekdays">
+              <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+            </div>
+
+            <div class="cal-days-grid" id="calDaysGrid"></div>
+
+            <div class="cal-actions">
+              <button type="button" class="cal-btn cal-btn-remove" onclick="resetCalDate(event)">Today</button>
+              <button type="button" class="cal-btn cal-btn-done" onclick="closeDatePicker(event)">Done</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field custom-picker-field" style="position:relative;">
+          <label>Dispatch Time *</label>
+          <div class="custom-picker-trigger" id="timePickerTrigger" onclick="toggleTimePicker(event)">
+            <div class="custom-picker-ico">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div class="custom-picker-meta">
+              <span class="custom-picker-sub">Start with</span>
+              <span class="custom-picker-val" id="selectedTimeDisplay">08:00 AM</span>
+            </div>
+            <div class="custom-picker-arrow">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+          </div>
+
+          <input type="hidden" id="dispatchTime" value="08:00">
+
+          <!-- FLOATING TIME POPUP -->
+          <div class="custom-time-popup" id="customTimePopup" style="display:none;" onclick="event.stopPropagation()">
+            <div class="time-ampm-switch">
+              <button type="button" class="ampm-pill active" id="ampmAM" onclick="setTimePeriod('AM', event)">AM</button>
+              <button type="button" class="ampm-pill" id="ampmPM" onclick="setTimePeriod('PM', event)">PM</button>
+            </div>
+            <div class="time-list-scroll" id="timeListScroll"></div>
           </div>
         </div>
       </div>
@@ -325,47 +393,54 @@
       <div class="modal-sub" id="editOrderCodeSub">Update details for Tracking Code</div>
 
       <div class="field" style="position:relative;">
-        <label>Seller Origin Farm Address *</label>
-        <div class="input-wrap autocomplete-wrap">
-          <input class="input" id="editOrderOrigin" placeholder="e.g. Talisay City, Cebu" autocomplete="off">
-          <div class="autocomplete-dropdown" id="editOriginDropdown" style="display:none;"></div>
-        </div>
-      </div>
-
-      <div class="field" style="position:relative;">
-        <label>Buyer / Receiving Farm Name *</label>
-        <div class="input-wrap autocomplete-wrap">
-          <input class="input" id="editOrderBuyer" placeholder="e.g. Green Water Farms" autocomplete="off">
+        <label>Buyer / Farm Name *</label>
+        <div class="input-wrap autocomplete-wrap has-ico">
+          <span class="input-ico-prefix">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </span>
+          <input class="input input-with-ico" id="editOrderBuyer" placeholder="e.g. Green Water Farms" autocomplete="off">
           <div class="autocomplete-dropdown" id="editBuyerDropdown" style="display:none;"></div>
         </div>
       </div>
 
       <div class="field" style="position:relative;">
-        <label>Delivery Farm Destination Address *</label>
-        <div class="input-wrap autocomplete-wrap">
-          <input class="input" id="editOrderDest" placeholder="e.g. Mandaue City, Cebu" autocomplete="off">
+        <label>Destination Farm Address *</label>
+        <div class="input-wrap autocomplete-wrap has-ico">
+          <span class="input-ico-prefix">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          </span>
+          <input class="input input-with-ico" id="editOrderDest" placeholder="e.g. Mandaue City, Cebu" autocomplete="off">
           <div class="autocomplete-dropdown" id="editDestDropdown" style="display:none;"></div>
         </div>
       </div>
 
       <div class="field">
         <label>Species / Fingerling Type *</label>
-        <div class="input-wrap">
-          <input class="input" id="editOrderSpecies" placeholder="e.g. Tilapia Fingerlings">
+        <div class="input-wrap has-ico">
+          <span class="input-ico-prefix">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12A10 10 0 0 1 12 2z"></path><path d="M12 6v6l4 2"></path></svg>
+          </span>
+          <input class="input input-with-ico" id="editOrderSpecies" placeholder="e.g. Tilapia Fingerlings">
         </div>
       </div>
 
       <div class="field">
         <label>Fingerling Quantity (pcs) *</label>
-        <div class="input-wrap">
-          <input class="input" id="editOrderQty" type="number" placeholder="e.g. 5000">
+        <div class="input-wrap has-ico">
+          <span class="input-ico-prefix">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+          </span>
+          <input class="input input-with-ico" id="editOrderQty" type="number" placeholder="e.g. 5000">
         </div>
       </div>
 
       <div class="field" style="margin-bottom:20px;">
         <label>Assigned Transport Personnel</label>
-        <div class="input-wrap">
-          <input class="input" id="editOrderPersonnel" placeholder="e.g. Ramon Cruz">
+        <div class="input-wrap has-ico">
+          <span class="input-ico-prefix">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </span>
+          <input class="input input-with-ico" id="editOrderPersonnel" placeholder="e.g. Ramon Cruz">
         </div>
       </div>
 
@@ -460,8 +535,7 @@
           <div class="section-label" style="margin-top:16px;">Shipment Info</div>
           <div class="card">
             <div class="detail-row2"><span>Tracking Code</span><span class="mono" id="dtCode">—</span></div>
-            <div class="detail-row2"><span>Seller Farm Origin</span><span id="dtOrigin">—</span></div>
-            <div class="detail-row2"><span>Buyer Destination</span><span id="dtDest">—</span></div>
+            <div class="detail-row2"><span>Destination Address</span><span id="dtDest">—</span></div>
             <div class="detail-row2"><span>Buyer / Farm</span><span id="dtBuyer">—</span></div>
             <div class="detail-row2"><span>Quantity</span><span id="dtQty">—</span></div>
             <div class="detail-row2"><span>IoT Unit</span><span class="mono" id="dtUnit">—</span></div>

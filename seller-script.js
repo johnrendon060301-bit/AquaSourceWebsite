@@ -742,7 +742,6 @@ function openEditOrderModal(id) {
   editingOrderId = o.id || o.code;
 
   const codeSub = document.getElementById('editOrderCodeSub');
-  const originInput = document.getElementById('editOrderOrigin');
   const buyerInput = document.getElementById('editOrderBuyer');
   const speciesInput = document.getElementById('editOrderSpecies');
   const qtyInput = document.getElementById('editOrderQty');
@@ -750,7 +749,6 @@ function openEditOrderModal(id) {
   const driverInput = document.getElementById('editOrderPersonnel');
 
   if (codeSub) codeSub.textContent = `Tracking #${o.code || o.id}`;
-  if (originInput) originInput.value = o.origin || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
   if (buyerInput) buyerInput.value = o.buyer || '';
   if (speciesInput) speciesInput.value = o.species || '';
   if (qtyInput) qtyInput.value = o.quantity || '';
@@ -772,7 +770,7 @@ function closeEditOrderModal() {
 async function saveEditedOrder() {
   if (!editingOrderId) return;
 
-  const originInput = document.getElementById('editOrderOrigin');
+  const existingOrder = orders.find(x => String(x.id) === String(editingOrderId) || String(x.code) === String(editingOrderId));
   const buyerInput = document.getElementById('editOrderBuyer');
   const speciesInput = document.getElementById('editOrderSpecies');
   const qtyInput = document.getElementById('editOrderQty');
@@ -780,18 +778,13 @@ async function saveEditedOrder() {
   const driverInput = document.getElementById('editOrderPersonnel');
   const btn = document.getElementById('editOrderSubmitBtn');
 
-  const origin = originInput ? originInput.value.trim() : '';
+  const origin = (existingOrder && existingOrder.origin) || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
   const buyer = buyerInput ? buyerInput.value.trim() : '';
   const species = speciesInput ? speciesInput.value.trim() : 'Tilapia Fingerlings';
   const qty = qtyInput ? parseInt(qtyInput.value, 10) : 0;
   const dest = destInput ? destInput.value.trim() : '';
   const personnel = driverInput ? driverInput.value.trim() : '';
 
-  if (!origin || origin.length < 2) {
-    showToast('Please enter the seller origin address.');
-    if (originInput) originInput.focus();
-    return;
-  }
   if (!buyer || buyer.length < 2) {
     showToast('Please enter the buyer / farm name.');
     if (buyerInput) buyerInput.focus();
@@ -1036,47 +1029,125 @@ const KNOWN_PLACE_COORDINATES = {
   'cagayan de oro': [8.4542, 124.6319],
   'general santos': [6.1164, 125.1716],
   'zamboanga': [6.9214, 122.0790],
-  'zamboanga city': [6.9214, 122.0790]
+  'zamboanga city': [6.9214, 122.0790],
+
+  // Major Cebu & Regional Landmarks, Malls, Ports & Public Facilities
+  'sm seaside': [10.2818, 123.8817],
+  'sm seaside city cebu': [10.2818, 123.8817],
+  'sm seaside cebu': [10.2818, 123.8817],
+  'sm city cebu': [10.3117, 123.9184],
+  'sm cebu': [10.3117, 123.9184],
+  'ayala center cebu': [10.3173, 123.9056],
+  'ayala cebu': [10.3173, 123.9056],
+  'it park': [10.3297, 123.9066],
+  'cebu it park': [10.3297, 123.9066],
+  'robinsons galleria cebu': [10.3060, 123.9110],
+  'il corso': [10.2640, 123.8740],
+  'il corso srp': [10.2640, 123.8740],
+  'parkmall': [10.3242, 123.9333],
+  'parkmall mandaue': [10.3242, 123.9333],
+  'pacific mall mandaue': [10.3440, 123.9430],
+  'j centre mall': [10.3390, 123.9380],
+  'gaisano grand mall talisay': [10.2620, 123.8340],
+  'gaisano fiesta mall tabunok': [10.2625, 123.8360],
+  'gaisano tabunok': [10.2625, 123.8360],
+  'gaisano grand carcar': [10.1130, 123.6650],
+  'south town centre': [10.2680, 123.8400],
+  'cebu south bus terminal': [10.2985, 123.8938],
+  'south bus terminal': [10.2985, 123.8938],
+  'cebu north bus terminal': [10.3245, 123.9335],
+  'north bus terminal': [10.3245, 123.9335],
+  'mactan cebu international airport': [10.3075, 123.9790],
+  'mactan airport': [10.3075, 123.9790],
+  'mcia': [10.3075, 123.9790],
+  'cebu pier 1': [10.2950, 123.9070],
+  'cebu port': [10.3000, 123.9100],
+  'pier 1 cebu': [10.2950, 123.9070],
+  'pier 3 cebu': [10.3020, 123.9120],
+  'hagnaya port': [11.0450, 123.9450],
+  'maya port': [11.2650, 124.0500],
+  'toledo port': [10.3750, 123.6350],
+  'bato port santander': [9.4200, 123.3400],
+  'liloan port': [10.3950, 124.0050],
+  'tabunok public market': [10.2610, 123.8355],
+  'tabunok market': [10.2610, 123.8355],
+  'carbon market': [10.2915, 123.8990],
+  'carbon market cebu': [10.2915, 123.8990],
+  'pasil market': [10.2925, 123.8912],
+  'pasil fish port': [10.2925, 123.8912],
+  'mandaue city public market': [10.3340, 123.9420],
+  'carcar public market': [10.1080, 123.6450],
+  'naga boardwalk': [10.2075, 123.7585],
+  'naga city boardwalk': [10.2075, 123.7585],
+  'cebu provincial capitol': [10.3160, 123.8910],
+  'cebu capitol': [10.3160, 123.8910],
+  'talisay city hall': [10.2520, 123.8380],
+  'mandaue city hall': [10.3315, 123.9415],
+  'lapu-lapu city hall': [10.3140, 123.9510],
+  'naga city hall': [10.2080, 123.7580],
+  'carcar city hall': [10.1065, 123.6430],
+  'minglanilla municipal hall': [10.2445, 123.7975],
+  'san fernando municipal hall': [10.1555, 123.7285],
+  'barili municipal hall': [10.1455, 123.5305],
+  'toledo city hall': [10.3755, 123.6405],
+  'balamban municipal hall': [10.5005, 123.7155],
+  'danao city hall': [10.5205, 124.0305],
+  'vicente sotto': [10.3100, 123.8915],
+  'vsmmc': [10.3100, 123.8915],
+  'chong hua hospital': [10.3120, 123.8920],
+  'chong hua mandaue': [10.3235, 123.9315],
+  'ucmed': [10.3240, 123.9320],
+  'talisay district hospital': [10.2525, 123.8375],
+  'cebu doctors university hospital': [10.3135, 123.8930],
+  'usc talamban': [10.3540, 123.9125],
+  'university of san carlos': [10.3000, 123.8980],
+  'up cebu': [10.3200, 123.8990],
+  'cit university': [10.2950, 123.8800],
+  'uc main': [10.2980, 123.8990],
+  'usjr basak': [10.2920, 123.8680],
+  'bfar 7': [10.3015, 123.8965],
+  'bfar cebu': [10.3015, 123.8965],
+  'aquasource hatchery': [10.2550, 123.8400],
+  'carcar fish pond': [10.1085, 123.6480],
+  'barili fish sanctuary': [10.1450, 123.5300],
+  'carmen marine sanctuary': [10.5800, 124.0200],
+  'asturias tilapia farm': [10.5650, 123.7550],
+  'bantayan fishpond': [11.1700, 123.7200],
+  'talisay fish landing': [10.2450, 123.8210]
 };
 
 async function resolveLocationCoordinates(addressText, secondaryText = '', fallbackDefault = [10.3157, 123.8854]) {
   const primary = (addressText || '').trim();
   const secondary = (secondaryText || '').trim();
-  const combined = `${primary} ${secondary}`.trim();
-  if (!combined) return fallbackDefault;
+  if (!primary && !secondary) return fallbackDefault;
 
-  const candidates = [primary, secondary, combined].filter(Boolean);
+  const cleanPrimary = primary.toLowerCase().replace(/,\s*philippines/gi, '').replace(/,\s*cebu/gi, '').trim();
+  const combined = `${primary} ${secondary}`.trim().toLowerCase();
 
-  // 1. Direct and Substring Check on KNOWN_PLACE_COORDINATES
-  for (const text of candidates) {
-    const rawClean = text.toLowerCase().trim();
-    for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-      if (rawClean === key || rawClean.includes(key) || key.includes(rawClean)) {
-        if (isWithinPhilippines(coords[0], coords[1])) {
-          return coords;
-        }
-      }
+  const sortedKeys = Object.keys(KNOWN_PLACE_COORDINATES).sort((a, b) => b.length - a.length);
+
+  // 1. Exact direct match on primary address or clean primary
+  for (const key of sortedKeys) {
+    if (cleanPrimary === key || primary.toLowerCase() === key) {
+      const coords = KNOWN_PLACE_COORDINATES[key];
+      if (isWithinPhilippines(coords[0], coords[1])) return coords;
     }
   }
 
-  // 2. Tokenized word-level matching
-  for (const text of candidates) {
-    const cleanTokens = text.toLowerCase().replace(/philippines|cebu|city|brgy\.?|barangay|farm|hatchery|pond/gi, ' ').replace(/[^\w\s]/g, ' ').split(/\s+/).filter(t => t.length > 2);
-    for (const t of cleanTokens) {
-      for (const [key, coords] of Object.entries(KNOWN_PLACE_COORDINATES)) {
-        if (key === t || key.startsWith(t) || key.includes(t)) {
-          if (isWithinPhilippines(coords[0], coords[1])) {
-            return coords;
-          }
-        }
-      }
+  // 2. Specific landmark or place name match (ignoring generic 'cebu' and 'philippines')
+  for (const key of sortedKeys) {
+    if (key === 'cebu' || key === 'philippines' || key === 'cebu city') continue;
+    const regex = new RegExp('\\b' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+    if (regex.test(combined) || combined.includes(key)) {
+      const coords = KNOWN_PLACE_COORDINATES[key];
+      if (isWithinPhilippines(coords[0], coords[1])) return coords;
     }
   }
 
-  // 3. Online Photon Geocoding bounded strictly to Philippines
-  if (navigator.onLine) {
+  // 3. Online live geocoding lookup via Photon bounded to Philippines
+  if (navigator.onLine && primary) {
     try {
-      const q = encodeURIComponent(`${primary || secondary} Philippines`);
+      const q = encodeURIComponent(`${cleanPrimary || primary} Cebu Philippines`);
       const resp = await fetch(`https://photon.komoot.io/api/?q=${q}&limit=3&lat=10.3157&lon=123.8854&bbox=116.0,4.5,127.0,21.5`);
       if (resp.ok) {
         const json = await resp.json();
@@ -1094,6 +1165,11 @@ async function resolveLocationCoordinates(addressText, secondaryText = '', fallb
     } catch (e) {
       console.warn('Geocoding lookup note:', e);
     }
+  }
+
+  // 4. Fallback check for Cebu City / generic Cebu
+  if (combined.includes('cebu') || combined.includes('philippines')) {
+    return KNOWN_PLACE_COORDINATES['cebu'] || fallbackDefault;
   }
 
   return fallbackDefault;
@@ -1257,7 +1333,73 @@ const GOOGLE_MAPS_PLACES = [
   { main: 'Zamboanga City', sub: 'Zamboanga del Sur' },
   { main: 'Angeles City', sub: 'Pampanga' },
   { main: 'Baguio City', sub: 'Benguet' },
-  { main: 'Dagupan City', sub: 'Pangasinan' }
+  { main: 'Dagupan City', sub: 'Pangasinan' },
+
+  // Commercial Malls & Centers
+  { main: 'SM Seaside City Cebu', sub: 'South Road Properties (SRP), Cebu City' },
+  { main: 'SM City Cebu', sub: 'North Reclamation Area, Cebu City' },
+  { main: 'Ayala Center Cebu', sub: 'Cebu Business Park, Cebu City' },
+  { main: 'Cebu IT Park', sub: 'Lahug, Cebu City' },
+  { main: 'Robinsons Galleria Cebu', sub: 'General Maxilom Ave, Cebu City' },
+  { main: 'Il Corso Lifemalls', sub: 'City di Mare, SRP, Cebu City' },
+  { main: 'Parkmall', sub: 'Ouano Ave, Mandaue City' },
+  { main: 'Pacific Mall', sub: 'UN Avenue, Mandaue City' },
+  { main: 'J Centre Mall', sub: 'A.S. Fortuna St, Mandaue City' },
+  { main: 'Gaisano Grand Mall Talisay', sub: 'San Isidro, Talisay City, Cebu' },
+  { main: 'Gaisano Fiesta Mall Tabunok', sub: 'Tabunok, Talisay City, Cebu' },
+  { main: 'Gaisano Grand Carcar', sub: 'Carcar City, Cebu' },
+  { main: 'South Town Centre', sub: 'Bulacao, Talisay City, Cebu' },
+
+  // Transport Terminals & Ports
+  { main: 'Cebu South Bus Terminal (CSBT)', sub: 'N. Bacalso Ave, Cebu City' },
+  { main: 'Cebu North Bus Terminal (CNBT)', sub: 'Logarta Ave, Mandaue City' },
+  { main: 'Mactan-Cebu International Airport (MCIA)', sub: 'Lapu-Lapu City, Cebu' },
+  { main: 'Cebu International Port / Pier 1', sub: 'Cebu City' },
+  { main: 'Cebu Pier 3', sub: 'Cebu City' },
+  { main: 'Hagnaya Port', sub: 'San Remigio, Cebu' },
+  { main: 'Maya Port', sub: 'Daanbantayan, Cebu' },
+  { main: 'Toledo FastCat Port', sub: 'Toledo City, Cebu' },
+  { main: 'Bato Ferry Terminal', sub: 'Santander, Cebu' },
+  { main: 'Liloan Ferry Terminal', sub: 'Liloan, Cebu' },
+
+  // Public Markets & Fish Ports
+  { main: 'Tabunok Public Market', sub: 'Talisay City, Cebu' },
+  { main: 'Carbon Public Market', sub: 'Cebu City' },
+  { main: 'Pasil Fish Port & Market', sub: 'Pasil, Cebu City' },
+  { main: 'Mandaue City Public Market', sub: 'Mandaue City, Cebu' },
+  { main: 'Carcar City Public Market', sub: 'Carcar City, Cebu' },
+  { main: 'Naga City Boardwalk', sub: 'Naga City, Cebu' },
+
+  // Government & Civic Centers
+  { main: 'Cebu Provincial Capitol', sub: 'Escario St, Cebu City' },
+  { main: 'Talisay City Hall', sub: 'Dumlog, Talisay City, Cebu' },
+  { main: 'Mandaue City Hall', sub: 'Centro, Mandaue City' },
+  { main: 'Lapu-Lapu City Hall', sub: 'Pajo, Lapu-Lapu City' },
+  { main: 'Naga City Hall', sub: 'Naga City, Cebu' },
+  { main: 'Carcar City Hall', sub: 'Carcar City, Cebu' },
+  { main: 'Minglanilla Municipal Hall', sub: 'Minglanilla, Cebu' },
+  { main: 'San Fernando Municipal Hall', sub: 'San Fernando, Cebu' },
+  { main: 'Barili Municipal Hall', sub: 'Barili, Cebu' },
+  { main: 'Toledo City Hall', sub: 'Toledo City, Cebu' },
+  { main: 'Balamban Municipal Hall', sub: 'Balamban, Cebu' },
+  { main: 'Danao City Hall', sub: 'Danao City, Cebu' },
+
+  // Hospitals & Universities
+  { main: 'Vicente Sotto Memorial Medical Center', sub: 'B. Rodriguez St, Cebu City' },
+  { main: 'Chong Hua Hospital Mandaue & Cancer Center', sub: 'Mandaue City' },
+  { main: 'University of Cebu Medical Center (UCMed)', sub: 'Mandaue City' },
+  { main: 'Talisay District Hospital', sub: 'San Roque, Talisay City' },
+  { main: 'University of San Carlos - Talamban Campus', sub: 'Talamban, Cebu City' },
+  { main: 'University of the Philippines Cebu', sub: 'Lahug, Cebu City' },
+  { main: 'Cebu Institute of Technology - University', sub: 'N. Bacalso Ave, Cebu City' },
+
+  // Aquaculture Farms & BFAR Facilities
+  { main: 'BFAR Regional Office 7 & Hatchery', sub: 'Arellano Blvd, Cebu City' },
+  { main: 'AquaSource Central Hatchery', sub: 'Talisay City, Cebu' },
+  { main: 'Carcar Fish Ponds & Aquaculture Center', sub: 'Carcar City, Cebu' },
+  { main: 'Barili Freshwater Fish Sanctuary', sub: 'Barili, Cebu' },
+  { main: 'Asturias Tilapia & Freshwater Pond', sub: 'Asturias, Cebu' },
+  { main: 'Bantayan Aqua Marine Farm', sub: 'Bantayan Island, Cebu' }
 ];
 
 function hideAllAutocomplete() {
@@ -1479,49 +1621,373 @@ function setupAutocomplete(inputId, dropdownId) {
 }
 
 function initOrderAutocomplete() {
-  setupAutocomplete('originInput', 'originDropdown');
   setupAutocomplete('buyerNameInput', 'buyerNameDropdown');
   setupAutocomplete('destInput', 'destDropdown');
-  setupAutocomplete('editOrderOrigin', 'editOriginDropdown');
   setupAutocomplete('editOrderBuyer', 'editBuyerDropdown');
   setupAutocomplete('editOrderDest', 'editDestDropdown');
   setupAutocomplete('editAddress', 'editAddressDropdown');
 
-  // Close suggestions when clicking outside
+  // Close suggestions and custom pickers when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.autocomplete-wrap')) {
       hideAllAutocomplete();
     }
+    if (!e.target.closest('#datePickerTrigger') && !e.target.closest('#customCalendarPopup')) {
+      closeDatePicker();
+    }
+    if (!e.target.closest('#timePickerTrigger') && !e.target.closest('#customTimePopup')) {
+      closeTimePicker();
+    }
   });
+}
+
+/* =========================================================================
+   CUSTOM DATE & TIME PICKERS (MATCHING DESIGN REFERENCE)
+   ========================================================================= */
+
+let customCalSelectedDate = new Date();
+let customCalViewYear = customCalSelectedDate.getFullYear();
+let customCalViewMonth = customCalSelectedDate.getMonth();
+let customSelectedPeriod = 'AM';
+let customSelectedTimeStr = '08:00';
+
+function formatDisplayDate(d) {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`;
+}
+
+function formatIsoDate(d) {
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${year}-${month}-${day}`;
+}
+
+function toggleDatePicker(e) {
+  if (e) e.stopPropagation();
+  closeTimePicker();
+  hideAllAutocomplete();
+
+  const popup = document.getElementById('customCalendarPopup');
+  const trigger = document.getElementById('datePickerTrigger');
+  if (!popup) return;
+
+  const isVisible = popup.style.display !== 'none';
+  if (isVisible) {
+    closeDatePicker();
+  } else {
+    // Dynamic drop-up positioning: check space below vs above
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      const modalBox = trigger.closest('.modal-box');
+      let shouldDropUp = true; // Default to drop up on form bottom row
+      if (modalBox) {
+        const modalRect = modalBox.getBoundingClientRect();
+        const spaceBelow = modalRect.bottom - rect.bottom;
+        const spaceAbove = rect.top - modalRect.top;
+        if (spaceBelow >= 360) {
+          shouldDropUp = false;
+        } else if (spaceAbove >= 260) {
+          shouldDropUp = true;
+        }
+      }
+      popup.classList.toggle('drop-up', shouldDropUp);
+      trigger.classList.add('active');
+    }
+
+    popup.style.display = 'block';
+    customCalViewYear = customCalSelectedDate.getFullYear();
+    customCalViewMonth = customCalSelectedDate.getMonth();
+    renderCustomCalendar();
+  }
+}
+
+function closeDatePicker(e) {
+  if (e) e.stopPropagation();
+  const popup = document.getElementById('customCalendarPopup');
+  const trigger = document.getElementById('datePickerTrigger');
+  if (popup) popup.style.display = 'none';
+  if (trigger) trigger.classList.remove('active');
+}
+
+function prevCalMonth(e) {
+  if (e) e.stopPropagation();
+  customCalViewMonth--;
+  if (customCalViewMonth < 0) {
+    customCalViewMonth = 11;
+    customCalViewYear--;
+  }
+  renderCustomCalendar();
+}
+
+function nextCalMonth(e) {
+  if (e) e.stopPropagation();
+  customCalViewMonth++;
+  if (customCalViewMonth > 11) {
+    customCalViewMonth = 0;
+    customCalViewYear++;
+  }
+  renderCustomCalendar();
+}
+
+function renderCustomCalendar() {
+  const monthTitle = document.getElementById('calMonthTitle');
+  const daysGrid = document.getElementById('calDaysGrid');
+  if (!monthTitle || !daysGrid) return;
+
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+
+  monthTitle.textContent = `${monthNames[customCalViewMonth]} ${customCalViewYear}`;
+
+  const firstDayIndex = new Date(customCalViewYear, customCalViewMonth, 1).getDay();
+  // Mon=0, Sun=6
+  const startDay = (firstDayIndex + 6) % 7;
+
+  const daysInMonth = new Date(customCalViewYear, customCalViewMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(customCalViewYear, customCalViewMonth, 0).getDate();
+
+  const today = new Date();
+  const isCurrentMonthToday = today.getFullYear() === customCalViewYear && today.getMonth() === customCalViewMonth;
+
+  let html = '';
+
+  // Prev month padding days
+  for (let i = startDay - 1; i >= 0; i--) {
+    const prevDay = daysInPrevMonth - i;
+    html += `<div class="cal-day-cell other-month">${prevDay}</div>`;
+  }
+
+  // Days of current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isSelected = 
+      customCalSelectedDate.getFullYear() === customCalViewYear &&
+      customCalSelectedDate.getMonth() === customCalViewMonth &&
+      customCalSelectedDate.getDate() === d;
+
+    const isToday = isCurrentMonthToday && today.getDate() === d;
+
+    let classes = ['cal-day-cell'];
+    if (isSelected) classes.push('selected');
+    if (isToday) classes.push('today');
+
+    html += `<div class="${classes.join(' ')}" onclick="pickCalDay(${customCalViewYear}, ${customCalViewMonth}, ${d}, event)">${d}</div>`;
+  }
+
+  // Next month padding days
+  const totalRendered = startDay + daysInMonth;
+  const remainingCells = (totalRendered <= 35 ? 35 : 42) - totalRendered;
+  for (let n = 1; n <= remainingCells; n++) {
+    html += `<div class="cal-day-cell other-month">${n}</div>`;
+  }
+
+  daysGrid.innerHTML = html;
+}
+
+function pickCalDay(year, month, day, e) {
+  if (e) e.stopPropagation();
+  customCalSelectedDate = new Date(year, month, day);
+
+  const displayEl = document.getElementById('selectedDateDisplay');
+  const inputEl = document.getElementById('dispatchDate');
+
+  if (displayEl) displayEl.textContent = formatDisplayDate(customCalSelectedDate);
+  if (inputEl) inputEl.value = formatIsoDate(customCalSelectedDate);
+
+  renderCustomCalendar();
+}
+
+function resetCalDate(e) {
+  if (e) e.stopPropagation();
+  const today = new Date();
+  customCalSelectedDate = today;
+  customCalViewYear = today.getFullYear();
+  customCalViewMonth = today.getMonth();
+
+  const displayEl = document.getElementById('selectedDateDisplay');
+  const inputEl = document.getElementById('dispatchDate');
+
+  if (displayEl) displayEl.textContent = formatDisplayDate(customCalSelectedDate);
+  if (inputEl) inputEl.value = formatIsoDate(customCalSelectedDate);
+
+  renderCustomCalendar();
+}
+
+/* ============ CUSTOM TIME PICKER ============ */
+function toggleTimePicker(e) {
+  if (e) e.stopPropagation();
+  closeDatePicker();
+  hideAllAutocomplete();
+
+  const popup = document.getElementById('customTimePopup');
+  const trigger = document.getElementById('timePickerTrigger');
+  if (!popup) return;
+
+  const isVisible = popup.style.display !== 'none';
+  if (isVisible) {
+    closeTimePicker();
+  } else {
+    // Dynamic drop-up positioning: check space below vs above
+    if (trigger) {
+      const rect = trigger.getBoundingClientRect();
+      const modalBox = trigger.closest('.modal-box');
+      let shouldDropUp = true;
+      if (modalBox) {
+        const modalRect = modalBox.getBoundingClientRect();
+        const spaceBelow = modalRect.bottom - rect.bottom;
+        const spaceAbove = rect.top - modalRect.top;
+        if (spaceBelow >= 260) {
+          shouldDropUp = false;
+        } else if (spaceAbove >= 200) {
+          shouldDropUp = true;
+        }
+      }
+      popup.classList.toggle('drop-up', shouldDropUp);
+      trigger.classList.add('active');
+    }
+
+    popup.style.display = 'block';
+    renderTimeList();
+  }
+}
+
+function closeTimePicker(e) {
+  if (e) e.stopPropagation();
+  const popup = document.getElementById('customTimePopup');
+  const trigger = document.getElementById('timePickerTrigger');
+  if (popup) popup.style.display = 'none';
+  if (trigger) trigger.classList.remove('active');
+}
+
+function setTimePeriod(period, e) {
+  if (e) e.stopPropagation();
+  customSelectedPeriod = period;
+
+  const amBtn = document.getElementById('ampmAM');
+  const pmBtn = document.getElementById('ampmPM');
+  if (amBtn && pmBtn) {
+    amBtn.classList.toggle('active', period === 'AM');
+    pmBtn.classList.toggle('active', period === 'PM');
+  }
+
+  updateTimeValues();
+  renderTimeList();
+}
+
+function renderTimeList() {
+  const listEl = document.getElementById('timeListScroll');
+  if (!listEl) return;
+
+  const slots = [
+    '00:00', '00:30', '01:00', '01:30', '02:00', '02:30',
+    '03:00', '03:30', '04:00', '04:30', '05:00', '05:30',
+    '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30'
+  ];
+
+  let html = '';
+  slots.forEach(slot => {
+    const isSelected = (slot === customSelectedTimeStr);
+    html += `
+      <div class="time-item ${isSelected ? 'selected' : ''}" onclick="pickCustomTime('${slot}', event)">
+        <span>${slot}</span>
+        ${isSelected ? `<span class="time-item-tag">${customSelectedPeriod}</span>` : ''}
+      </div>
+    `;
+  });
+
+  listEl.innerHTML = html;
+}
+
+function pickCustomTime(slot, e) {
+  if (e) e.stopPropagation();
+  customSelectedTimeStr = slot;
+  updateTimeValues();
+  renderTimeList();
+  closeTimePicker();
+}
+
+function updateTimeValues() {
+  const displayEl = document.getElementById('selectedTimeDisplay');
+  const inputEl = document.getElementById('dispatchTime');
+
+  if (displayEl) {
+    displayEl.textContent = `${customSelectedTimeStr} ${customSelectedPeriod}`;
+  }
+
+  const parts = customSelectedTimeStr.split(':');
+  let h = parseInt(parts[0], 10);
+  const m = parts[1] || '00';
+
+  if (customSelectedPeriod === 'PM') {
+    if (h < 12) h += 12;
+  } else {
+    if (h === 12) h = 0;
+  }
+
+  const hStr = String(h).padStart(2, '0');
+  if (inputEl) {
+    inputEl.value = `${hStr}:${m}`;
+  }
 }
 
 function openNewOrderModal() {
   hideAllAutocomplete();
+  closeDatePicker();
+  closeTimePicker();
 
   // Reset Form
   selectedPersonnel = null;
   selectedUnit = null;
 
   const sel = document.getElementById('personnelSelect');
-  const originInput = document.getElementById('originInput');
   const buyerInput = document.getElementById('buyerNameInput');
   const speciesInput = document.getElementById('speciesInput');
   const qtyInput = document.getElementById('qtyInput');
   const destInput = document.getElementById('destInput');
-  const dispatchInput = document.getElementById('dispatchInput');
 
   if (sel) {
     sel.innerHTML = 'Select transport personnel<span>▾</span>';
     sel.classList.add('placeholder');
   }
-  if (originInput) {
-    originInput.value = (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
-  }
   if (buyerInput) buyerInput.value = '';
   if (speciesInput) speciesInput.value = 'Tilapia Fingerlings';
   if (qtyInput) qtyInput.value = '';
   if (destInput) destInput.value = '';
-  if (dispatchInput) dispatchInput.value = '';
+
+  // Initialize Custom Date to today
+  const now = new Date();
+  customCalSelectedDate = now;
+  customCalViewYear = now.getFullYear();
+  customCalViewMonth = now.getMonth();
+
+  const dateDisplay = document.getElementById('selectedDateDisplay');
+  const dateInput = document.getElementById('dispatchDate');
+  if (dateDisplay) dateDisplay.textContent = formatDisplayDate(now);
+  if (dateInput) dateInput.value = formatIsoDate(now);
+
+  // Initialize Custom Time to nearest 30 mins
+  let currentHours = now.getHours();
+  let currentMins = now.getMinutes() >= 30 ? '30' : '00';
+  customSelectedPeriod = currentHours >= 12 ? 'PM' : 'AM';
+  let dispHours = currentHours % 12;
+  if (dispHours === 0 && currentHours >= 12) dispHours = 12;
+
+  const slotHoursStr = String(dispHours).padStart(2, '0');
+  customSelectedTimeStr = `${slotHoursStr}:${currentMins}`;
+
+  const amBtn = document.getElementById('ampmAM');
+  const pmBtn = document.getElementById('ampmPM');
+  if (amBtn && pmBtn) {
+    amBtn.classList.toggle('active', customSelectedPeriod === 'AM');
+    pmBtn.classList.toggle('active', customSelectedPeriod === 'PM');
+  }
+
+  updateTimeValues();
 
   // Populate Personnel Dropdown from live data
   const opts = document.getElementById('personnelOptions');
@@ -1553,6 +2019,8 @@ function openNewOrderModal() {
 
 function closeNewOrderModal() {
   hideAllAutocomplete();
+  closeDatePicker();
+  closeTimePicker();
   const modal = document.getElementById('newOrderModal');
   if (modal) modal.classList.remove('active');
 }
@@ -1612,29 +2080,40 @@ function pickUnit(unitId) {
 }
 
 async function createOrder() {
-  const originInput = document.getElementById('originInput');
   const buyerInput = document.getElementById('buyerNameInput');
   const speciesInput = document.getElementById('speciesInput');
   const qtyInput = document.getElementById('qtyInput');
   const destInput = document.getElementById('destInput');
-  const dispatchInput = document.getElementById('dispatchInput');
+  const dispatchDate = document.getElementById('dispatchDate');
+  const dispatchTime = document.getElementById('dispatchTime');
 
-  const origin = originInput ? (originInput.value.trim() || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu') : ((sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu');
+  const origin = (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Talisay City, Cebu';
   const buyer = buyerInput ? buyerInput.value.trim() : '';
   const species = speciesInput ? speciesInput.value.trim() : 'Tilapia Fingerlings';
   const qty = qtyInput ? parseInt(qtyInput.value, 10) : 0;
   const dest = destInput ? destInput.value.trim() : '';
-  const dispatchTime = dispatchInput ? dispatchInput.value : '';
+  const dateVal = dispatchDate ? dispatchDate.value.trim() : '';
+  const timeVal = dispatchTime ? dispatchTime.value.trim() : '';
+
+  // Construct ISO timestamp from date and time
+  let finalDispatchIso = new Date().toISOString();
+  if (dateVal && timeVal) {
+    try {
+      finalDispatchIso = new Date(`${dateVal}T${timeVal}`).toISOString();
+    } catch (e) {
+      finalDispatchIso = new Date().toISOString();
+    }
+  } else if (dateVal) {
+    try {
+      finalDispatchIso = new Date(`${dateVal}T12:00:00`).toISOString();
+    } catch (e) {
+      finalDispatchIso = new Date().toISOString();
+    }
+  }
 
   // Order Validation Trappings
   if (!selectedPersonnel) {
     showToast('Please select transport personnel for this shipment.');
-    return;
-  }
-
-  if (!origin || origin.length < 2) {
-    showToast('Please enter the seller origin farm address.');
-    if (originInput) originInput.focus();
     return;
   }
 
@@ -1696,7 +2175,7 @@ async function createOrder() {
     driverName: selectedPersonnel,
     driverPhone: matchedStaff ? (matchedStaff.phone || '') : '',
     unit: '', // Empty until transport personnel scans and links the IoT monitoring unit via mobile
-    dispatchTime: dispatchTime || new Date().toISOString(),
+    dispatchTime: finalDispatchIso,
     status: 'transit', // Starts in transit
     stage: 1,
     progress: 45,
@@ -1797,6 +2276,92 @@ async function loadDynamicSellerRoadRoute(startCoord, endCoord, mapInstance) {
   }).addTo(mapInstance);
 }
 
+const CEBU_KEY_LANDMARKS = [
+  // Aquaculture & Hatcheries
+  { name: 'BFAR Regional Office 7 Multi-Species Hatchery', type: 'hatchery', tag: 'BFAR Facility', coords: [10.3015, 123.8965], desc: 'Arellano Blvd, Cebu City · Government Central Marine Hatchery' },
+  { name: 'AquaSource Central Hatchery', type: 'hatchery', tag: 'Hatchery Station', coords: [10.2550, 123.8400], desc: 'Talisay City, Cebu · Fingerling Production & Testing Facility' },
+  { name: 'Carcar Fish Ponds & Aquaculture Center', type: 'hatchery', tag: 'Fish Ponds', coords: [10.1085, 123.6480], desc: 'Carcar City, Cebu · Freshwater Tilapia & Bangus Grow-out Ponds' },
+  { name: 'Barili Freshwater Fish Sanctuary', type: 'hatchery', tag: 'Fish Sanctuary', coords: [10.1450, 123.5300], desc: 'Barili, Cebu · Tilapia Breeding Farm & Fish Sanctuary' },
+  { name: 'Asturias Tilapia Breeding Farm', type: 'hatchery', tag: 'Tilapia Farm', coords: [10.5650, 123.7550], desc: 'Asturias, Cebu · Inland Aquaculture Ponds' },
+  { name: 'Bantayan Aqua Marine Farm', type: 'hatchery', tag: 'Marine Farm', coords: [11.1700, 123.7200], desc: 'Bantayan Island, Cebu · Marine Hatchery & Crab Ponds' },
+
+  // Commercial Malls & Centers
+  { name: 'SM Seaside City Cebu', type: 'mall', tag: 'Shopping Mall', coords: [10.2818, 123.8817], desc: 'South Road Properties (SRP), Cebu City' },
+  { name: 'SM City Cebu', type: 'mall', tag: 'Shopping Mall', coords: [10.3117, 123.9184], desc: 'North Reclamation Area, Cebu City' },
+  { name: 'Ayala Center Cebu', type: 'mall', tag: 'Business Center', coords: [10.3173, 123.9056], desc: 'Cebu Business Park, Cebu City' },
+  { name: 'Cebu IT Park', type: 'mall', tag: 'IT Hub', coords: [10.3297, 123.9066], desc: 'Lahug, Cebu City · Commercial & Tech District' },
+  { name: 'Parkmall Mandaue', type: 'mall', tag: 'Commercial Hub', coords: [10.3242, 123.9333], desc: 'Ouano Ave, Mandaue City' },
+  { name: 'Gaisano Fiesta Mall Tabunok', type: 'mall', tag: 'Shopping Mall', coords: [10.2625, 123.8360], desc: 'Tabunok, Talisay City, Cebu' },
+  { name: 'Gaisano Grand Carcar', type: 'mall', tag: 'Shopping Mall', coords: [10.1130, 123.6650], desc: 'Carcar City, Cebu' },
+
+  // Transport Hubs & Ports
+  { name: 'Cebu South Bus Terminal (CSBT)', type: 'transport', tag: 'Bus Terminal', coords: [10.2985, 123.8938], desc: 'N. Bacalso Ave, Cebu City · Main Southbound Transport Hub' },
+  { name: 'Cebu North Bus Terminal (CNBT)', type: 'transport', tag: 'Bus Terminal', coords: [10.3245, 123.9335], desc: 'Logarta Ave, Mandaue City · Main Northbound Transport Hub' },
+  { name: 'Mactan-Cebu International Airport (MCIA)', type: 'transport', tag: 'Airport', coords: [10.3075, 123.9790], desc: 'Lapu-Lapu City, Cebu · Terminal 1 & 2' },
+  { name: 'Cebu International Port / Pier 1', type: 'port', tag: 'Sea Port', coords: [10.2950, 123.9070], desc: 'Cebu City · Passenger & Cargo Sea Port' },
+  { name: 'Hagnaya Port', type: 'port', tag: 'Ferry Port', coords: [11.0450, 123.9450], desc: 'San Remigio, Cebu · Ferry Gate to Bantayan' },
+  { name: 'Toledo FastCat Sea Port', type: 'port', tag: 'Sea Port', coords: [10.3750, 123.6350], desc: 'Toledo City, Cebu · Ferry Gate to Negros' },
+  { name: 'Bato Ferry Terminal', type: 'port', tag: 'Ferry Port', coords: [9.4200, 123.3400], desc: 'Santander, Cebu · Southern Ferry Connection' },
+
+  // Public Markets & Fish Ports
+  { name: 'Tabunok Public Market', type: 'market', tag: 'Public Market', coords: [10.2610, 123.8355], desc: 'Talisay City, Cebu · Wholesale Agri-Fisheries Market' },
+  { name: 'Pasil Fish Port & Market', type: 'market', tag: 'Wholesale Fish Market', coords: [10.2925, 123.8912], desc: 'Pasil, Cebu City · Central Seafood Distribution' },
+  { name: 'Carbon Public Market', type: 'market', tag: 'Central Market', coords: [10.2915, 123.8990], desc: 'Cebu City · Historic Central Agri Market' },
+  { name: 'Mandaue City Public Market', type: 'market', tag: 'Public Market', coords: [10.3340, 123.9420], desc: 'Centro, Mandaue City, Cebu' },
+  { name: 'Carcar City Public Market', type: 'market', tag: 'Public Market', coords: [10.1080, 123.6450], desc: 'Carcar Rotunda, Carcar City, Cebu' },
+  { name: 'Naga City Boardwalk', type: 'market', tag: 'Baywalk Park', coords: [10.2075, 123.7585], desc: 'City of Naga, Cebu · Coastal Promenade' },
+
+  // Civic Government Centers
+  { name: 'Cebu Provincial Capitol', type: 'civic', tag: 'Provincial Capitol', coords: [10.3160, 123.8910], desc: 'Escario St, Cebu City' },
+  { name: 'Talisay City Hall', type: 'civic', tag: 'City Hall', coords: [10.2520, 123.8380], desc: 'Dumlog, Talisay City, Cebu' },
+  { name: 'Mandaue City Hall', type: 'civic', tag: 'City Hall', coords: [10.3315, 123.9415], desc: 'Centro, Mandaue City, Cebu' },
+  { name: 'Lapu-Lapu City Hall', type: 'civic', tag: 'City Hall', coords: [10.3140, 123.9510], desc: 'Pajo, Lapu-Lapu City, Cebu' },
+  { name: 'Naga City Hall', type: 'civic', tag: 'City Hall', coords: [10.2080, 123.7580], desc: 'Naga City, Cebu' },
+  { name: 'Carcar City Hall', type: 'civic', tag: 'City Hall', coords: [10.1065, 123.6430], desc: 'Carcar City, Cebu' },
+  { name: 'Minglanilla Municipal Hall', type: 'civic', tag: 'Municipal Hall', coords: [10.2445, 123.7975], desc: 'Minglanilla, Cebu' }
+];
+
+function buildLandmarksLayerGroup() {
+  const layer = L.layerGroup();
+  
+  const iconSVGs = {
+    hatchery: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12c.5-2.5 2.5-4 5-4 4 0 7 4 7 4s-3 4-7 4c-2.5 0-4.5-1.5-5-4z"></path><circle cx="9" cy="11" r="1"></circle></svg>',
+    mall: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>',
+    transport: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+    port: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>',
+    market: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
+    civic: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>'
+  };
+
+  CEBU_KEY_LANDMARKS.forEach(lm => {
+    const iconHtml = `
+      <div class="landmark-pin pin-${lm.type}" style="width:26px; height:26px;" title="${escapeHtml(lm.name)}">
+        ${iconSVGs[lm.type] || iconSVGs.civic}
+      </div>
+    `;
+    const landmarkIcon = L.divIcon({
+      className: 'custom-landmark-icon',
+      html: iconHtml,
+      iconSize: [26, 26],
+      iconAnchor: [13, 13]
+    });
+
+    const marker = L.marker(lm.coords, { icon: landmarkIcon });
+    marker.bindPopup(`
+      <div style="font-size:13px; line-height:1.4;">
+        <span style="display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:800; background:#E8F7FB; color:#0B5D7A; text-transform:uppercase; margin-bottom:4px;">${escapeHtml(lm.tag)}</span>
+        <div style="font-weight:800; color:#1A3038; font-size:13.5px; margin-bottom:3px;">${escapeHtml(lm.name)}</div>
+        <div style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(lm.desc)}</div>
+      </div>
+    `);
+    marker.addTo(layer);
+  });
+
+  return layer;
+}
+
+let sellerLandmarksLayer = null;
+
 async function initOrUpdateSellerMap(order) {
   const mapContainer = document.getElementById('sellerDetailMap');
   if (!mapContainer || typeof L === 'undefined') return;
@@ -1812,35 +2377,61 @@ async function initOrUpdateSellerMap(order) {
   if (!sellerDetailMap) {
     sellerDetailMap = L.map('sellerDetailMap', {
       zoomControl: true,
-      attributionControl: false
+      attributionControl: false,
+      maxZoom: 21
     }).setView(originCoords, 12);
 
-    // High-Definition Google Maps Layer
-    L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-      maxZoom: 20,
+    // High-Definition Google Maps Base Layers
+    const googleStreets = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+      maxZoom: 21,
+      maxNativeZoom: 20,
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       attribution: '&copy; Google Maps'
-    }).addTo(sellerDetailMap);
-
-    // Origin Hatchery Marker
-    const originIcon = L.divIcon({
-      className: 'custom-map-icon',
-      html: '<div style="background:#0B5D7A; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path></svg></div>',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
     });
-    sellerOriginMarker = L.marker(originCoords, { icon: originIcon }).addTo(sellerDetailMap)
-      .bindPopup(`<b>Seller Farm Origin</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(sellerOrigin)}</span>`);
+
+    const googleHybrid = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+      maxZoom: 21,
+      maxNativeZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Satellite'
+    });
+
+    const googleTerrain = L.tileLayer('https://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}', {
+      maxZoom: 21,
+      maxNativeZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      attribution: '&copy; Google Terrain'
+    });
+
+    // Default to Google Streets
+    googleStreets.addTo(sellerDetailMap);
+
+    // Build Landmarks & POI Overlay
+    sellerLandmarksLayer = buildLandmarksLayerGroup();
+    sellerLandmarksLayer.addTo(sellerDetailMap); // Active by default
+
+    // Google Maps Layer & Overlay Switcher
+    const baseLayers = {
+      '🗺️ Google Map': googleStreets,
+      '🛰️ Satellite Hybrid': googleHybrid,
+      '🏔️ Terrain': googleTerrain
+    };
+    const overlays = {
+      '📍 Key Cebu Landmarks & POIs': sellerLandmarksLayer
+    };
+
+    L.control.layers(baseLayers, overlays, { position: 'topright' }).addTo(sellerDetailMap);
+    L.control.scale({ imperial: false, metric: true, position: 'bottomleft' }).addTo(sellerDetailMap);
 
     // Destination Farm Marker
     const destIcon = L.divIcon({
       className: 'custom-map-icon',
-      html: '<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
+      html: '<div style="background:#FF5A5F; color:#fff; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; border:2px solid #fff; box-shadow:0 3px 10px rgba(0,0,0,0.3);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>',
+      iconSize: [34, 34],
+      iconAnchor: [17, 17]
     });
     sellerDestMarker = L.marker(destCoords, { icon: destIcon }).addTo(sellerDetailMap)
-      .bindPopup(`<b>Buyer Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
+      .bindPopup(`<b>Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
 
     // Live Transport Truck Marker
     const truckIcon = L.divIcon({
@@ -1850,17 +2441,13 @@ async function initOrUpdateSellerMap(order) {
       iconAnchor: [18, 18]
     });
     sellerTruckMarker = L.marker(originCoords, { icon: truckIcon }).addTo(sellerDetailMap)
-      .bindPopup(`<b>${escapeHtml(order.code)} Transport Unit</b><br>Driver: ${escapeHtml(order.personnel || 'Driver')}<br>From: ${escapeHtml(sellerOrigin)}<br>To: ${escapeHtml(destAddress)}`);
+      .bindPopup(`<b>${escapeHtml(order.code)} Transport Unit</b><br>Driver: ${escapeHtml(order.personnel || 'Driver')}<br>Destination: ${escapeHtml(destAddress)}`);
 
     await loadDynamicSellerRoadRoute(originCoords, destCoords, sellerDetailMap);
   } else {
-    if (sellerOriginMarker) {
-      sellerOriginMarker.setLatLng(originCoords);
-      sellerOriginMarker.bindPopup(`<b>Seller Farm Origin</b><br><b>${escapeHtml(sellerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(sellerOrigin)}</span>`);
-    }
     if (sellerDestMarker) {
       sellerDestMarker.setLatLng(destCoords);
-      sellerDestMarker.bindPopup(`<b>Buyer Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
+      sellerDestMarker.bindPopup(`<b>Destination Farm</b><br><b>${escapeHtml(buyerName)}</b><br><span style="color:#5B7A85; font-size:11.5px;">📍 ${escapeHtml(destAddress)}</span>`);
     }
     await loadDynamicSellerRoadRoute(originCoords, destCoords, sellerDetailMap);
   }
@@ -1871,7 +2458,7 @@ async function initOrUpdateSellerMap(order) {
 
   if (sellerTruckMarker) {
     sellerTruckMarker.setLatLng(truckPos);
-    sellerTruckMarker.bindPopup(`<b>${escapeHtml(order.code)} Transport Unit</b><br>Driver: ${escapeHtml(order.personnel || 'Driver')}<br>From: ${escapeHtml(sellerOrigin)}<br>To: ${escapeHtml(destAddress)}`);
+    sellerTruckMarker.bindPopup(`<b>${escapeHtml(order.code)} Transport Unit</b><br>Driver: ${escapeHtml(order.personnel || 'Driver')}<br>Destination: ${escapeHtml(destAddress)}`);
   }
 
   const bounds = L.latLngBounds([originCoords, destCoords]);
@@ -1895,7 +2482,6 @@ function updateMonitoringModalState() {
   const stepArrived = document.getElementById('stepArrived');
 
   const dtCode = document.getElementById('dtCode');
-  const dtOrigin = document.getElementById('dtOrigin');
   const dtDest = document.getElementById('dtDest');
   const dtBuyer = document.getElementById('dtBuyer');
   const dtQty = document.getElementById('dtQty');
@@ -1903,8 +2489,10 @@ function updateMonitoringModalState() {
 
   if (titleSub) titleSub.textContent = `Tracking #${o.code || 'AQS-0000'}`;
   if (dtCode) dtCode.innerHTML = `${o.code || '—'} <button class="btn-copy-code" title="Copy tracking code" onclick="copyTrackingCode('${o.code}')">${ICONS.copy} Copy</button>`;
-  if (dtOrigin) dtOrigin.textContent = o.origin || (sellerProfile && (sellerProfile.address || sellerProfile.farmAddress)) || 'Seller Farm Hatchery';
   if (dtDest) dtDest.textContent = o.dest || o.destination || 'Receiving Farm';
+  if (dtBuyer) dtBuyer.textContent = o.buyer || '—';
+  if (dtQty) dtQty.textContent = `${Number(o.quantity || 0).toLocaleString()} pcs (${o.species || 'Tilapia'})`;
+  if (dtUnit) dtUnit.textContent = (o.unit && o.unit !== 'undefined' && o.unit.trim() !== '') ? o.unit : (o.status === 'cancelled' ? '—' : 'Pending Mobile Connection');
   if (dtBuyer) dtBuyer.textContent = o.buyer || '—';
   if (dtQty) dtQty.textContent = `${Number(o.quantity || 0).toLocaleString()} pcs (${o.species || 'Tilapia'})`;
   if (dtUnit) dtUnit.textContent = (o.unit && o.unit !== 'undefined' && o.unit.trim() !== '') ? o.unit : (o.status === 'cancelled' ? '—' : 'Pending Mobile Connection');
